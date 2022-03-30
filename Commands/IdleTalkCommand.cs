@@ -1,8 +1,53 @@
 using OpenMetaverse;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+
+using System.Text.Json;
 
 namespace SecondBot.Client {
+    public class ChatplusRequest {
+        public string? utterance {get; set;}
+        public string? username {get; set;}
+        public ChatplusAgentState? agentState {get; set;}
+    }
+    public class ChatplusAgentState {
+        public string? agentName {get; set;}
+        public string? tone {get; set;}
+        public string? age {get; set;}
+    }
+
+    public class ChatplusResponse {
+        public string? utterance {get; set;}
+        public ChatplusScoreResponse? bestResponse {get; set;}
+        public IList<ChatplusScoreResponse>? responses { get; set; }
+        public string[]? tokenized { get; set; }
+        public string[]? options { get; set; }
+    }
+    public class ChatplusScoreResponse {
+        public string? utterance {get; set;}
+        public float score {get; set;}
+        public string? url {get; set;}
+    }
+
+    public class MeboRequest {
+        public string? api_key {get; set;}
+        public string? agent_id {get; set;}
+        public string? utterance {get; set;}
+        public string? uid {get; set;}
+    }
+
+    public class MeboResponse {
+        public string? utterance {get; set;}
+        public MeboBestResponse? bestResponse {get; set;}
+    }
+    public class MeboBestResponse {
+        public string? utterance {get; set;}
+        public string[]? options { get; set; }
+        public string? topic {get; set;}
+        public bool? isAutoResponse {get; set;}
+
+    }
+
+
     public class IdleTalkCommand : Command {
 
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
@@ -10,6 +55,7 @@ namespace SecondBot.Client {
         private string chatplus_agentname;
         private string? mebo_apikey;
         private string? mebo_agent_id;
+
         public IdleTalkCommand(MyClient mclient) {
             this.mclient = mclient;
             this.chatApi = ChatApi.chatplus;
@@ -52,33 +98,34 @@ namespace SecondBot.Client {
         }
 
         async void chatplus(UUID fromUUID, string fromName, string message ,int type) {
+            this.mclient.Self.Chat(string.Empty, 0, ChatType.StartTyping);
+            this.mclient.Self.AnimationStart(Animations.TYPE, false);
+
+            // https://www.chaplus.jp/
             string URL = "https://www.chaplus.jp/v1/chat?apikey=" + this.chatplus_apikey;
-            var json = "{ \"utterance\" : \""+ message + "\", \"username\" : \"" + fromName + "\", \"agentstate\":{ \"agentName\": \"" + this.chatplus_agentname + "\", \"tone\": \"normal\", \"age\": \"13歳\"} }";
+            var jsonObject = new ChatplusRequest
+            {
+                utterance = message,
+                username = fromName,
+                agentState = new ChatplusAgentState
+                {
+                    agentName = this.chatplus_agentname,
+                    tone = "normal",
+                    age = "13歳"
+                }
+            };
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = System.Text.Json.JsonSerializer.Serialize(jsonObject, options);
             try {
                 using (var client = new HttpClient()) {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(URL, content);
                     if(response.IsSuccessStatusCode) {
                         var _response = await response.Content.ReadAsStringAsync();
-                        //Console.WriteLine(_response);
-                        Newtonsoft.Json.Linq.JObject jsonObj = Newtonsoft.Json.Linq.JObject.Parse(_response);
-                        // FIX ME:一旦むりやりなパースで
-                        var a = jsonObj["bestResponse"];
-                        if (a != null) {
-                            foreach(var i in a) {
-                                string str = i.ToString();
-                                if (str != null) {
-                                    if (str.Contains("utterance")) {
-                                        string s = str.Substring(14, str.Length -15);
-                                        Console.WriteLine("req:" + message);
-                                        Console.WriteLine("res:" + s);
-                                        if (type == 0) this.mclient.Self.Chat(s, 0, ChatType.Normal);
-                                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, s);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+
+                        ChatplusResponse? chatplusResponse = System.Text.Json.JsonSerializer.Deserialize<ChatplusResponse>(_response);
+                        if (type == 0) this.mclient.Self.Chat(chatplusResponse?.bestResponse?.utterance, 0, ChatType.Normal);
+                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, chatplusResponse?.bestResponse?.utterance);
                     } else {
                         Console.WriteLine("error");
                         if (type == 0) this.mclient.Self.Chat("error", 0, ChatType.Normal);
@@ -89,10 +136,15 @@ namespace SecondBot.Client {
                 Console.WriteLine(e.Message);
                 if (type == 0) this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, e.Message);
+            } finally {
+                this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+                this.mclient.Self.AnimationStop(Animations.TYPE, false);
             }
         }
 
         async void mebo(UUID fromUUID, string fromName, string message ,int type) {
+            this.mclient.Self.Chat(string.Empty, 0, ChatType.StartTyping);
+            this.mclient.Self.AnimationStart(Animations.TYPE, false);
 
             // https://mebo.work/
             if (this.mebo_apikey == null || this.mebo_apikey.Length == 0) {
@@ -107,32 +159,25 @@ namespace SecondBot.Client {
             }
 
             string URL = "https://api-mebo.dev/api";
-            var json = "{ \"api_key\" : \"" + this.mebo_apikey + "\", \"agent_id\": \"" + this.mebo_agent_id + "\", \"utterance\" : \""+ message + "\", \"uid\" : \"" + fromName + "\"}";
+            var jsonObject = new MeboRequest
+            {
+                api_key = this.mebo_apikey,
+                agent_id = this.mebo_agent_id,
+                utterance = message,
+                uid = fromName
+            };
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = System.Text.Json.JsonSerializer.Serialize(jsonObject, options);
             try {
                 using (var client = new HttpClient()) {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(URL, content);
                     if(response.IsSuccessStatusCode) {
                         var _response = await response.Content.ReadAsStringAsync();
-                        //Console.WriteLine(_response);
-                        Newtonsoft.Json.Linq.JObject jsonObj = Newtonsoft.Json.Linq.JObject.Parse(_response);
-                        // FIX ME:一旦むりやりなパースで
-                        var a = jsonObj["bestResponse"];
-                        if (a != null) {
-                            foreach(var i in a) {
-                                string str = i.ToString();
-                                if (str != null) {
-                                    if (str.Contains("utterance")) {
-                                        string s = str.Substring(14, str.Length -15);
-                                        Console.WriteLine("req:" + message);
-                                        Console.WriteLine("res:" + s);
-                                        if (type == 0) this.mclient.Self.Chat(s, 0, ChatType.Normal);
-                                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, s);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+
+                        MeboResponse? meboResponse = System.Text.Json.JsonSerializer.Deserialize<MeboResponse>(_response);
+                        if (type == 0) this.mclient.Self.Chat(meboResponse?.bestResponse?.utterance, 0, ChatType.Normal);
+                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, meboResponse?.bestResponse?.utterance);
                     } else {
                         Console.WriteLine("error");
                         if (type == 0) this.mclient.Self.Chat("error", 0, ChatType.Normal);
@@ -143,6 +188,9 @@ namespace SecondBot.Client {
                 Console.WriteLine(e.Message);
                 if (type == 0) this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, e.Message);
+            } finally {
+                this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+                this.mclient.Self.AnimationStop(Animations.TYPE, false);
             }
 
         }
