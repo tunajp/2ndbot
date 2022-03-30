@@ -17,7 +17,6 @@ $ sudo apt-get update; \
 $ dotnet new console -o 2ndbot
 $ cd 2ndbot
 $ dotnet add package LibreMetaverse
-$ dotnet add package Newtonsoft.Json
 
 $ copy .setting_sample.xml .settings.xml
 $ vim .setting.xml
