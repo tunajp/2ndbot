@@ -393,11 +393,11 @@ namespace SecondBot.Client {
 
                 // MEGABOLTの実装
                 //this.mclient.Self.ReplyToScriptDialog(ed.Channel, butindex, butlabel, ed.ObjectID);
-            } else if (message.Contains("前")) {
+            } else if (message.Contains("前へ")) {
                 movecommand.Forward();
-            } else if (message.Contains("右")) {
+            } else if (message.Contains("右へ")) {
                 movecommand.Right();
-            } else if (message.Contains("左")) {
+            } else if (message.Contains("左へ")) {
                 movecommand.Left();
             //} else if (message.Contains("うろ")) {
             //    this.findRandomObject();
