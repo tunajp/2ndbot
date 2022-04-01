@@ -20,6 +20,12 @@ namespace SecondBot.Client {
         private System.Timers.Timer updateTimer;
         private string? followTarget;
 
+        private bool loiter;
+        private Primitive? targetPrim;
+        private Vector3 beforPos;
+        static public DateTime lastChatDateTime;
+        private List<Primitive>? MovementTargetPrims;
+
         string? activeGroup;
 
         string nickname;
@@ -34,9 +40,13 @@ namespace SecondBot.Client {
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
         private ManualResetEvent GroupsEvent = new ManualResetEvent(false);
 
+        Dictionary<UUID, Primitive> PrimsWaiting = new Dictionary<UUID, Primitive>();
+        AutoResetEvent AllPropertiesReceived = new AutoResetEvent(false);
+
         private IdleTalkCommand idletalkcommand;
         private StandupCommand standupcommand;
         private TeleportCommand teleportcommand;
+        private MoveCommand movecommand;
 
         public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id) {
 
@@ -46,6 +56,8 @@ namespace SecondBot.Client {
             this.chatApi = ChatApi.chatplus; // デフォルトはchatplus
             this.currentAnims = new List<UUID>();
             this.followTarget = null;
+            this.loiter = false;
+            MyApplication.lastChatDateTime = DateTime.Now;
 
             this.nickname = nickname;
             this.home = home;
@@ -70,6 +82,7 @@ namespace SecondBot.Client {
 
             this.mclient.Inventory.InventoryObjectOffered += Inventory_InventoryObjectOfferd;
             this.mclient.Friends.FriendshipOffered += Frind_FrienshipOfferd;
+            this.mclient.Objects.ObjectProperties += Objects_OnObjectProperties;
 
             string firstName = firstname;
             string lastName = lastname;
@@ -80,13 +93,14 @@ namespace SecondBot.Client {
 
             this.mclient.Network.BeginLogin(this.ClientLogin);
 
-            updateTimer = new System.Timers.Timer(500);
+            updateTimer = new System.Timers.Timer(1000);
             updateTimer.Elapsed += new System.Timers.ElapsedEventHandler(updateTimer_Elapsed);
             updateTimer.Start();
 
             this.idletalkcommand = new IdleTalkCommand(this.mclient);
             this.standupcommand = new StandupCommand(this.mclient);
             this.teleportcommand = new TeleportCommand(this.mclient);
+            this.movecommand = new MoveCommand(this.mclient);
         }
 
         void MethodInvokedOnSigTerm(AssemblyLoadContext sender) {
@@ -231,6 +245,7 @@ namespace SecondBot.Client {
                 standupcommand.Execute(fromUUID, fromName, message, type);
 
             } else if (message.Contains("おいで") || message.Contains("来")) {
+                this.loiter = false;
                 this.mclient.Self.AutoPilotCancel();
                 standupcommand.setCurrentAnims(this.currentAnims);
                 standupcommand.Execute(fromUUID, fromName, message, type);
@@ -241,6 +256,7 @@ namespace SecondBot.Client {
 
             } else if (message.Contains("止")) {
                 followTarget = null;
+                this.loiter = false;
                 standupcommand.setCurrentAnims(this.currentAnims);
                 standupcommand.Execute(fromUUID, fromName, message, type);
                 this.mclient.Self.AutoPilotCancel();
@@ -298,6 +314,7 @@ namespace SecondBot.Client {
                     Console.WriteLine(this.mclient.ToString() + " failed to activate the group " + groupName);
                 }
             } else if (message.Contains("帰") || message.Contains("戻")) {
+                this.loiter = false;
                 string mes = "お家へ帰りまーす！";
                 if (String.IsNullOrEmpty(this.home)) {
                     mes = "お家がありません・・・";
@@ -344,7 +361,7 @@ namespace SecondBot.Client {
                 if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
             } else if (message.Contains("どこ")) {
-                string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();;
+                string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();
                 if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
             } else if(message.Contains("チャンネルチャット")) {
@@ -376,12 +393,40 @@ namespace SecondBot.Client {
 
                 // MEGABOLTの実装
                 //this.mclient.Self.ReplyToScriptDialog(ed.Channel, butindex, butlabel, ed.ObjectID);
+            } else if (message.Contains("前")) {
+                movecommand.Forward();
+            } else if (message.Contains("右")) {
+                movecommand.Right();
+            } else if (message.Contains("左")) {
+                movecommand.Left();
+            } else if (message.Contains("うろ")) {
+                //this.findRandomObject();
+                //this.targetPrim = this.getNextPrim();
+                //this.loiter = true;
+
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
                 idletalkcommand.Execute(fromUUID, fromName, message, type);
             }
 
+        }
+
+        private Primitive getNextPrim() {
+            int primsCount = MovementTargetPrims.Count;
+            Random r = new System.Random();
+            int next = r.Next(0, primsCount);
+            int i=0;
+            foreach (Primitive p in MovementTargetPrims)
+            {
+                if (i == next) {
+                    //target
+                    Console.WriteLine(p.Properties.Name);
+                    return p;
+                }
+                i++;
+            }
+            return null;
         }
 
         void Self_AnimationsChanged(object? sender, AnimationsChangedEventArgs e) {
@@ -400,8 +445,122 @@ namespace SecondBot.Client {
             //    if (c.Active)
             //        c.Think();
             this.follow();
+            TimeSpan d = DateTime.Now - MyApplication.lastChatDateTime;
+            if (d.TotalSeconds > 180) {
+                Console.WriteLine("ランダムな発言");
+                idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
+                idletalkcommand.Execute(UUID.Zero, "", "ランダム", 0);
+            }
+
+            if (this.loiter == true) {
+                if (this.targetPrim == null ) {
+                    this.findRandomObject();
+                    targetPrim = this.getNextPrim();
+                }
+
+                Vector3 newDirection;
+                newDirection.X = (float)this.targetPrim.Position.X;
+                newDirection.Y = (float)this.targetPrim.Position.Y;
+                newDirection.Z = (float)this.targetPrim.Position.Z;
+                this.mclient.Self.Movement.TurnToward(newDirection);
+                this.mclient.Self.Movement.SendUpdate(false);
+
+                uint regionX, regionY;
+                foreach(var t in this.mclient.Network.Simulators) {
+                    Utils.LongToUInts(t.Handle, out regionX, out regionY);
+                    double xTarget = (double)targetPrim.Position.X + (double)regionX;
+                    double yTarget = (double)targetPrim.Position.Y + (double)regionY;
+                    double zTarget = targetPrim.Position.Z - 2f;
+                    this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
+                }
+
+                float distance = Vector3.Distance(targetPrim.Position, this.mclient.Self.SimPosition);
+                if (distance < 1.0) {
+                    this.targetPrim = this.getNextPrim();
+                }
+                // TODO:どっかで突っかかると、どうしようもなくなりそう
+                float b_distance = Vector3.Distance(this.beforPos, this.mclient.Self.SimPosition);
+                if (b_distance < 0.1) {
+                    Console.WriteLine("スタックしたっぽいので、新たなターゲットを探す");
+                    this.mclient.Self.AutoPilotCancel();
+                    this.findRandomObject();
+                    this.targetPrim = this.getNextPrim();
+                }
+                this.beforPos = this.mclient.Self.SimPosition;
+            }
         }
 
+        private void findRandomObject() {
+            float radius = 20;
+            Vector3 location = this.mclient.Self.SimPosition;
+            List<Primitive> prims = this.mclient.Network.CurrentSim.ObjectsPrimitives.FindAll(
+                delegate(Primitive prim)
+                {
+                    Vector3 pos = prim.Position;
+                    return ((prim.ParentID == 0) && (pos != Vector3.Zero) && (Vector3.Distance(pos, location) < radius));
+                }
+            );
+
+            // *** request properties of these objects ***
+            bool complete = RequestObjectProperties(prims, 250);
+
+            this.MovementTargetPrims = new List<Primitive>(prims);
+
+        }
+
+        private bool RequestObjectProperties(List<Primitive> objects, int msPerRequest)
+        {
+            // Create an array of the local IDs of all the prims we are requesting properties for
+            uint[] localids = new uint[objects.Count];
+
+            lock (PrimsWaiting)
+            {
+                PrimsWaiting.Clear();
+
+                for (int i = 0; i < objects.Count; ++i)
+                {
+                    localids[i] = objects[i].LocalID;
+                    PrimsWaiting.Add(objects[i].ID, objects[i]);
+                }
+            }
+
+            this.mclient.Objects.SelectObjects(this.mclient.Network.CurrentSim, localids);
+
+            return AllPropertiesReceived.WaitOne(2000 + msPerRequest * objects.Count, false);
+        }
+
+        void Objects_OnObjectProperties(object? sender, ObjectPropertiesEventArgs e)
+        {
+            lock (PrimsWaiting)
+            {
+                Primitive prim;
+                if (PrimsWaiting.TryGetValue(e.Properties.ObjectID, out prim))
+                {
+                    prim.Properties = e.Properties;
+                }
+                PrimsWaiting.Remove(e.Properties.ObjectID);
+
+                if (PrimsWaiting.Count == 0)
+                    AllPropertiesReceived.Set();
+            }
+        }
+
+        public static Vector3? getTargetPos(MyClient client,string targetName) {
+            if (targetName != null) {
+                lock(client.Network.Simulators) {
+                    //Console.WriteLine(followTarget);
+                    foreach(var t in client.Network.Simulators) {
+                        Avatar targetAv = t.ObjectsAvatars.Find(avatar => avatar.Name == targetName);
+                        if (targetAv != null) {
+                            return targetAv.Position;
+                        }
+                    }
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
         private void follow() {
             if (followTarget != null) {
                 lock(this.mclient.Network.Simulators) {

@@ -93,8 +93,19 @@ namespace SecondBot.Client {
                 return;
             }
 
+            Vector3? targetPos = MyApplication.getTargetPos(this.mclient, fromName);
+            if (targetPos != null) {
+                Vector3 newDirection;
+                newDirection.X = (float)targetPos?.X;
+                newDirection.Y = (float)targetPos?.Y;
+                newDirection.Z = (float)targetPos?.Z;
+                this.mclient.Self.Movement.TurnToward(newDirection);
+                this.mclient.Self.Movement.SendUpdate(false);
+            }
+
             if (this.chatApi == ChatApi.chatplus) this.chatplus(fromUUID, fromName, message, type);
             if (this.chatApi == ChatApi.mebo) this.mebo(fromUUID, fromName, message, type);
+            MyApplication.lastChatDateTime = DateTime.Now;
         }
 
         async void chatplus(UUID fromUUID, string fromName, string message ,int type) {
