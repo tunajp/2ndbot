@@ -399,11 +399,10 @@ namespace SecondBot.Client {
                 movecommand.Right();
             } else if (message.Contains("左")) {
                 movecommand.Left();
-            } else if (message.Contains("うろ")) {
-                //this.findRandomObject();
-                //this.targetPrim = this.getNextPrim();
-                //this.loiter = true;
-
+            //} else if (message.Contains("うろ")) {
+            //    this.findRandomObject();
+            //    this.targetPrim = this.getNextPrim();
+            //    this.loiter = true;
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
