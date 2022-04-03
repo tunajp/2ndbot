@@ -403,6 +403,8 @@ namespace SecondBot.Client {
                 //this.mclient.Self.ReplyToScriptDialog(ed.Channel, butindex, butlabel, ed.ObjectID);
             } else if (message.Contains("前へ")) {
                 movecommand.Forward();
+            } else if (message.Contains("後ろへ")) {
+                movecommand.Back();
             } else if (message.Contains("右へ")) {
                 movecommand.Right();
             } else if (message.Contains("左へ")) {
