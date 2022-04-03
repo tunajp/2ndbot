@@ -20,6 +20,8 @@ namespace SecondBot.Client {
         private System.Timers.Timer updateTimer;
         private string? followTarget;
 
+        private bool randomChat;
+
         private bool loiter;
         private Primitive? targetPrim;
         private Vector3 beforPos;
@@ -56,6 +58,7 @@ namespace SecondBot.Client {
             this.chatApi = ChatApi.chatplus; // デフォルトはchatplus
             this.currentAnims = new List<UUID>();
             this.followTarget = null;
+            this.randomChat = true;
             this.loiter = false;
             MyApplication.lastChatDateTime = DateTime.Now;
 
@@ -188,7 +191,7 @@ namespace SecondBot.Client {
 
         void command(UUID fromUUID, string fromName, string message ,int type) {
             if (message.Contains("コマンド") || message.Contains("ヘルプ") || message.Contains("一覧")) {
-                string commandList = "座 uuid,休,立ち,おいで,止,テレポ sim/x/y/z,終了,グループ groupname,帰/戻,チャットモード 指名or全レス,チャットAPI chatplus or mebo,どこ,タッチ uuid";
+                string commandList = Constants.COMMANDS;
                 if (type == 0) this.mclient.Self.Chat(commandList, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, commandList);
 
@@ -403,6 +406,19 @@ namespace SecondBot.Client {
             //    this.findRandomObject();
             //    this.targetPrim = this.getNextPrim();
             //    this.loiter = true;
+            } else if (message.Contains("ランダム発言")) {
+                string mes = "";
+                string arg = message.ToLower();
+                if (arg.Contains("on")) {
+                    this.randomChat = true;
+                    mes = "ランダム発言をONにしました。邪魔なときな「立川君ランダム発言 OFF」と命令してください。";
+                } else if (arg.Contains("off")) {
+                    this.randomChat = false;
+                    mes = "ランダム発言をOFFにしました。寂しいときな「立川君ランダム発言 ON」と命令してください。";
+                }
+                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
@@ -444,11 +460,13 @@ namespace SecondBot.Client {
             //    if (c.Active)
             //        c.Think();
             this.follow();
-            TimeSpan d = DateTime.Now - MyApplication.lastChatDateTime;
-            if (d.TotalSeconds > 180) {
-                Console.WriteLine("ランダムな発言");
-                idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
-                idletalkcommand.Execute(UUID.Zero, "", "ランダム", 0);
+            if (this.randomChat) {
+                TimeSpan d = DateTime.Now - MyApplication.lastChatDateTime;
+                if (d.TotalSeconds > Constants.RANDOM_CHAT_TIMER) {
+                    Console.WriteLine("ランダムな発言");
+                    idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
+                    idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
+                }
             }
 
             if (this.loiter == true) {
