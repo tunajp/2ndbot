@@ -1,8 +1,15 @@
 # 2ndbot
 
-Second Life bot.
+Second Life Bot System.
 
 using libremetaverse
+
+chat API
+
+https://www.chaplus.jp/
+
+https://mebo.work/
+
 
 ```
 $ wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
