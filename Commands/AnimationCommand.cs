@@ -39,6 +39,9 @@ namespace SecondBot.Client {
 
         private void stopAnim() {
             List<UUID> currentAnims = new List<UUID>();
+            this.mclient.Self.SignaledAnimations.ForEach(delegate(KeyValuePair<UUID, int> kvp) {
+                currentAnims.Add(kvp.Key);
+            });
             foreach(UUID anim in currentAnims) {
                 this.mclient.Self.AnimationStop(anim, true);
             }
