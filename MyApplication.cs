@@ -49,6 +49,7 @@ namespace SecondBot.Client {
         private StandupCommand standupcommand;
         private TeleportCommand teleportcommand;
         private MoveCommand movecommand;
+        private CreateNotecardCommand createnotecardcommand;
 
         public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id) {
 
@@ -104,6 +105,7 @@ namespace SecondBot.Client {
             this.standupcommand = new StandupCommand(this.mclient);
             this.teleportcommand = new TeleportCommand(this.mclient);
             this.movecommand = new MoveCommand(this.mclient);
+            this.createnotecardcommand = new CreateNotecardCommand(this.mclient);
         }
 
         void MethodInvokedOnSigTerm(AssemblyLoadContext sender) {
@@ -194,7 +196,8 @@ namespace SecondBot.Client {
                 string commandList = Constants.COMMANDS;
                 if (type == 0) this.mclient.Self.Chat(commandList, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, commandList);
-
+            } else if(message.Contains("マニュアル")) {
+                createnotecardcommand.Execute(fromUUID, fromName, message, type);
             } else if(message.Contains("座")) {
                 var arr1 = message.Split(' ');
                 if (arr1.Length == 1) {
