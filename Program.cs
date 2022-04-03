@@ -10,7 +10,7 @@ namespace SecondBot.Client {
             Console.WriteLine("2ndBot Start");
 
             try {
-                XElement xml = XElement.Load(".settings.xml");
+                XElement xml = XElement.Load(Constants.SETTING_XML_FILENAME);
                 IEnumerable<XElement> bots = from item in xml.Elements("bot") select item;
                 int botNums = bots.Count<XElement>();
                 Console.WriteLine("Bots:" + botNums);
