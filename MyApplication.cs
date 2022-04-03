@@ -49,6 +49,7 @@ namespace SecondBot.Client {
         private StandupCommand standupcommand;
         private TeleportCommand teleportcommand;
         private MoveCommand movecommand;
+        private AnimationCommand animationcommand;
         private CreateNotecardCommand createnotecardcommand;
 
         public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id) {
@@ -105,6 +106,7 @@ namespace SecondBot.Client {
             this.standupcommand = new StandupCommand(this.mclient);
             this.teleportcommand = new TeleportCommand(this.mclient);
             this.movecommand = new MoveCommand(this.mclient);
+            this.animationcommand = new AnimationCommand(this.mclient);
             this.createnotecardcommand = new CreateNotecardCommand(this.mclient);
         }
 
@@ -421,7 +423,24 @@ namespace SecondBot.Client {
                 }
                 if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
-
+            } else if (message.Contains("アニメリスト")) {
+                animationcommand.list(fromUUID, fromName, message, type);
+            } else if (message.Contains("アニメ")) {
+                int index = message.IndexOf("アニメ");
+                int index2 = message.IndexOf(" ", index);
+                if (index2 == -1) {
+                    string mes = "アニメーション名を指定してください";
+                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    return;
+                }
+                string animName = message.Substring(index2+1, message.Length - index2-1);
+                animationcommand.play(animName);
+            } else if (message.Contains("踊")) {
+                Random r = new System.Random();
+                int next = r.Next(1, 7);
+                string danceanim = "DANCE" + next.ToString();
+                animationcommand.play(danceanim);
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
