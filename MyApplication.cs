@@ -23,8 +23,8 @@ namespace SecondBot.Client {
         private bool randomChat;
 
         private bool loiter;
-        private Primitive? targetPrim;
-        private Vector3 beforPos;
+        private DateTime lastLoiterDateTime;
+        private Vector3 loiterStartRegionPos;
         static public DateTime lastChatDateTime;
         private List<Primitive>? MovementTargetPrims;
 
@@ -62,6 +62,7 @@ namespace SecondBot.Client {
             this.followTarget = null;
             this.randomChat = true;
             this.loiter = false;
+            this.lastLoiterDateTime = DateTime.Now;
             MyApplication.lastChatDateTime = DateTime.Now;
 
             this.nickname = nickname;
@@ -116,6 +117,7 @@ namespace SecondBot.Client {
         void Network_OnLogin(object? sender, LoginProgressEventArgs e) {
             if (e.Status == LoginStatus.Success) {
                 Console.WriteLine("Login success");
+                this.loiterStartRegionPos = this.mclient.Self.SimPosition;
             }
             else if (e.Status == LoginStatus.Failed) {
                 Console.WriteLine("Login Failed");
@@ -409,10 +411,11 @@ namespace SecondBot.Client {
                 movecommand.Right();
             } else if (message.Contains("左へ")) {
                 movecommand.Left();
-            //} else if (message.Contains("うろ")) {
-            //    this.findRandomObject();
-            //    this.targetPrim = this.getNextPrim();
-            //    this.loiter = true;
+            } else if (message.Contains("うろうろ")) {
+                //this.findRandomObject();
+                //this.targetPrim = this.getNextPrim();
+                this.loiterStartRegionPos = this.mclient.Self.SimPosition;
+                this.loiter = true;
             } else if (message.Contains("ランダム発言")) {
                 string mes = "";
                 string arg = message.ToLower();
@@ -444,6 +447,7 @@ namespace SecondBot.Client {
                 string danceanim = "DANCE" + next.ToString();
                 animationcommand.play(danceanim);
             } else if (message.Contains("デバッグ")) {
+
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
                 idletalkcommand.Execute(fromUUID, fromName, message, type);
@@ -494,40 +498,37 @@ namespace SecondBot.Client {
             }
 
             if (this.loiter == true) {
-                if (this.targetPrim == null ) {
-                    this.findRandomObject();
-                    targetPrim = this.getNextPrim();
+
+                TimeSpan d = DateTime.Now - this.lastLoiterDateTime;
+                if (d.TotalSeconds > Constants.LOITER_TIMER) {
+                    Console.WriteLine("開始場所:" + this.loiterStartRegionPos.X + "," + this.loiterStartRegionPos.Y);
+                    Random r = new System.Random();
+                    int targetX = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
+                    int targetY = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
+
+                    Console.WriteLine("ターゲット位置:" + (this.loiterStartRegionPos.X + targetX) + "," + (this.loiterStartRegionPos.Y + targetY));
+
+                    Vector3 newDirection;
+                    newDirection.X = (float)this.loiterStartRegionPos.X + targetX;
+                    newDirection.Y = (float)this.loiterStartRegionPos.Y + targetY;
+                    newDirection.Z = (float)this.loiterStartRegionPos.Z;
+                    this.mclient.Self.Movement.TurnToward(newDirection);
+                    this.mclient.Self.Movement.SendUpdate(false);
+
+                    uint regionX, regionY;
+                    foreach(var t in this.mclient.Network.Simulators) {
+                        Utils.LongToUInts(t.Handle, out regionX, out regionY);
+                        double xTarget = (double)this.loiterStartRegionPos.X + targetX + (double)regionX;
+                        double yTarget = (double)this.loiterStartRegionPos.Y + targetY + (double)regionY;
+                        double zTarget = this.loiterStartRegionPos.Z - 2f;
+                        this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
+                        break;
+                    }
+
+                    this.lastLoiterDateTime = DateTime.Now;
                 }
 
-                Vector3 newDirection;
-                newDirection.X = (float)this.targetPrim.Position.X;
-                newDirection.Y = (float)this.targetPrim.Position.Y;
-                newDirection.Z = (float)this.targetPrim.Position.Z;
-                this.mclient.Self.Movement.TurnToward(newDirection);
-                this.mclient.Self.Movement.SendUpdate(false);
 
-                uint regionX, regionY;
-                foreach(var t in this.mclient.Network.Simulators) {
-                    Utils.LongToUInts(t.Handle, out regionX, out regionY);
-                    double xTarget = (double)targetPrim.Position.X + (double)regionX;
-                    double yTarget = (double)targetPrim.Position.Y + (double)regionY;
-                    double zTarget = targetPrim.Position.Z - 2f;
-                    this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
-                }
-
-                float distance = Vector3.Distance(targetPrim.Position, this.mclient.Self.SimPosition);
-                if (distance < 1.0) {
-                    this.targetPrim = this.getNextPrim();
-                }
-                // TODO:どっかで突っかかると、どうしようもなくなりそう
-                float b_distance = Vector3.Distance(this.beforPos, this.mclient.Self.SimPosition);
-                if (b_distance < 0.1) {
-                    Console.WriteLine("スタックしたっぽいので、新たなターゲットを探す");
-                    this.mclient.Self.AutoPilotCancel();
-                    this.findRandomObject();
-                    this.targetPrim = this.getNextPrim();
-                }
-                this.beforPos = this.mclient.Self.SimPosition;
             }
         }
 
@@ -629,7 +630,9 @@ namespace SecondBot.Client {
                                 double xTarget = (double)targetAv.Position.X + (double)regionX;
                                 double yTarget = (double)targetAv.Position.Y + (double)regionY;
                                 double zTarget = targetAv.Position.Z - 2f;
-                                //Console.WriteLine(xTarget + "," + yTarget + "," + zTarget);
+                                //Console.WriteLine("Region:" + regionX + "," + regionY); // 263680,248064 多分そのリージョンの0,0座標
+                                //Console.WriteLine("Target:" + (double)targetAv.Position.X + "," + (double)targetAv.Position.Y); // 231.68441772460938,118.41368103027344
+                                //Console.WriteLine("AutoPilot:" + xTarget + "," + yTarget);
 
                                 if (zTarget > 0) this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
                             } else {
