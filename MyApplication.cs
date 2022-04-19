@@ -56,8 +56,8 @@ namespace SecondBot.Client {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
-            this.chatMode = ChatMode.Nominate; // デフォルトは指名モード
-            this.chatApi = ChatApi.chatplus; // デフォルトはchatplus
+            this.chatMode = ChatMode.Nominate;
+            this.chatApi = ChatApi.chatplus;
             this.currentAnims = new List<UUID>();
             this.followTarget = null;
             this.randomChat = true;
@@ -414,6 +414,7 @@ namespace SecondBot.Client {
             } else if (message.Contains("うろうろ")) {
                 //this.findRandomObject();
                 //this.targetPrim = this.getNextPrim();
+                this.followTarget = null;
                 this.loiterStartRegionPos = this.mclient.Self.SimPosition;
                 this.loiter = true;
             } else if (message.Contains("ランダム発言")) {
@@ -501,28 +502,44 @@ namespace SecondBot.Client {
 
                 TimeSpan d = DateTime.Now - this.lastLoiterDateTime;
                 if (d.TotalSeconds > Constants.LOITER_TIMER) {
-                    Console.WriteLine("開始場所:" + this.loiterStartRegionPos.X + "," + this.loiterStartRegionPos.Y);
                     Random r = new System.Random();
-                    int targetX = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
-                    int targetY = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
+                    int nextAction = r.Next(0, 3); // 0-2
+                    standupcommand.setCurrentAnims(this.currentAnims);
+                    standupcommand.Execute(UUID.Zero, "", "", 0);
 
-                    Console.WriteLine("ターゲット位置:" + (this.loiterStartRegionPos.X + targetX) + "," + (this.loiterStartRegionPos.Y + targetY));
+                    if (nextAction != 0) {
+                        Console.WriteLine("開始場所:" + this.loiterStartRegionPos.X + "," + this.loiterStartRegionPos.Y);
+                        int targetX = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
+                        int targetY = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
 
-                    Vector3 newDirection;
-                    newDirection.X = (float)this.loiterStartRegionPos.X + targetX;
-                    newDirection.Y = (float)this.loiterStartRegionPos.Y + targetY;
-                    newDirection.Z = (float)this.loiterStartRegionPos.Z;
-                    this.mclient.Self.Movement.TurnToward(newDirection);
-                    this.mclient.Self.Movement.SendUpdate(false);
+                        Console.WriteLine("ターゲット位置:" + (this.loiterStartRegionPos.X + targetX) + "," + (this.loiterStartRegionPos.Y + targetY));
 
-                    uint regionX, regionY;
-                    foreach(var t in this.mclient.Network.Simulators) {
-                        Utils.LongToUInts(t.Handle, out regionX, out regionY);
-                        double xTarget = (double)this.loiterStartRegionPos.X + targetX + (double)regionX;
-                        double yTarget = (double)this.loiterStartRegionPos.Y + targetY + (double)regionY;
-                        double zTarget = this.loiterStartRegionPos.Z - 2f;
-                        this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
-                        break;
+                        Vector3 newDirection;
+                        newDirection.X = (float)this.loiterStartRegionPos.X + targetX;
+                        newDirection.Y = (float)this.loiterStartRegionPos.Y + targetY;
+                        newDirection.Z = (float)this.loiterStartRegionPos.Z;
+                        this.mclient.Self.Movement.TurnToward(newDirection);
+                        this.mclient.Self.Movement.SendUpdate(false);
+
+                        uint regionX, regionY;
+                        foreach(var t in this.mclient.Network.Simulators) {
+                            Utils.LongToUInts(t.Handle, out regionX, out regionY);
+                            double xTarget = (double)this.loiterStartRegionPos.X + targetX + (double)regionX;
+                            double yTarget = (double)this.loiterStartRegionPos.Y + targetY + (double)regionY;
+                            double zTarget = this.loiterStartRegionPos.Z - 2f;
+                            this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
+                            break;
+                        }
+                    } else {
+                        this.findRandomObject();
+                        Primitive targetPrim = this.getNextPrim();
+                        if (targetPrim != null) {
+                            Console.WriteLine("Sit->" + targetPrim.Properties.Name);
+                            //this.mclient.Self.Touch(targetPrim.LocalID);
+                            this.mclient.Self.RequestSit(targetPrim.ID, Vector3.Zero);
+                            this.mclient.Self.Sit();
+                        }
+
                     }
 
                     this.lastLoiterDateTime = DateTime.Now;
@@ -533,7 +550,7 @@ namespace SecondBot.Client {
         }
 
         private void findRandomObject() {
-            float radius = 20;
+            float radius = 5;
             Vector3 location = this.mclient.Self.SimPosition;
             List<Primitive> prims = this.mclient.Network.CurrentSim.ObjectsPrimitives.FindAll(
                 delegate(Primitive prim)
