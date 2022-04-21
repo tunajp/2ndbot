@@ -114,15 +114,18 @@ namespace SecondBot.Client {
         void MethodInvokedOnSigTerm(AssemblyLoadContext sender) {
             Console.WriteLine("SIGHUP");
         }
-        void Network_OnLogin(object? sender, LoginProgressEventArgs e) {
+        async void Network_OnLogin(object? sender, LoginProgressEventArgs e) {
+            String mes = await SecondLifeFeedCommand.feed();
             if (e.Status == LoginStatus.Success) {
                 Console.WriteLine("Login success");
                 this.loiterStartRegionPos = this.mclient.Self.SimPosition;
+                this.mclient.Self.Chat(mes, 0, ChatType.Normal);
             }
             else if (e.Status == LoginStatus.Failed) {
                 Console.WriteLine("Login Failed");
                 Program.myAppCount -= 1;
                 if (Program.myAppCount == 0) {
+                    Console.WriteLine(mes);
                     Environment.Exit(0);
                 }
                 return;
@@ -196,7 +199,7 @@ namespace SecondBot.Client {
             }
         }
 
-        void command(UUID fromUUID, string fromName, string message ,int type) {
+        async void command(UUID fromUUID, string fromName, string message ,int type) {
             if (message.Contains("コマンド") || message.Contains("ヘルプ") || message.Contains("一覧")) {
                 string commandList = Constants.COMMANDS;
                 if (type == 0) this.mclient.Self.Chat(commandList, 0, ChatType.Normal);
@@ -449,6 +452,8 @@ namespace SecondBot.Client {
                 int next = r.Next(1, 7);
                 string danceanim = "DANCE" + next.ToString();
                 animationcommand.play(danceanim);
+            } else if (message.Contains("Second Life") || message.Contains("セカンドライフ")) {
+                this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
             } else if (message.Contains("デバッグ")) {
 
             } else {
