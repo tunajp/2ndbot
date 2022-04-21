@@ -1,7 +1,7 @@
 using OpenMetaverse;
 using System.Text.RegularExpressions;
-
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace SecondBot.Client {
     public class ChatplusRequest {
@@ -204,6 +204,66 @@ namespace SecondBot.Client {
                 this.mclient.Self.AnimationStop(Animations.TYPE, false);
             }
 
+        }
+
+        public async void rondomMessage() {
+            this.mclient.Self.Chat(string.Empty, 0, ChatType.StartTyping);
+            this.mclient.Self.AnimationStart(Animations.TYPE, false);
+
+            Random r = new System.Random();
+            int nextAction = r.Next(0, 50); // 0-49
+            // togetter 10
+            // はてぶ 40
+            if (nextAction < 10) {
+                // togetter
+                try {
+                    using (var client = new HttpClient()) {
+                        var URL = "https://togetter.com/rss/hot";
+                        var response = await client.GetAsync(URL);
+                        if(response.IsSuccessStatusCode) {
+                            var _response = await response.Content.ReadAsStringAsync();
+                            var document = XDocument.Parse(_response);
+                            XElement? xml = document.Root;
+                            XElement? channel = xml.Element("channel");
+                            IEnumerable<XElement>? items = channel?.Elements("item");
+                            var mes = items?.ElementAt(nextAction)?.Element("title")?.Value;
+                            mes += " " + items?.ElementAt(nextAction)?.Element("link")?.Value;
+                            this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                        } else {
+                            this.mclient.Self.Chat("error", 0, ChatType.Normal);
+                        }
+                    }
+                } catch (Exception e) {
+                    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
+                }
+            } else {
+                // はてぶ
+                try {
+                    using (var client = new HttpClient()) {
+                        var URL = "https://b.hatena.ne.jp/hotentry/general.rss";
+                        XNamespace d = "http://purl.org/rss/1.0/";
+                        XNamespace dc = "http://purl.org/dc/elements/1.1/";
+                        var response = await client.GetAsync(URL);
+                        if(response.IsSuccessStatusCode) {
+                            var _response = await response.Content.ReadAsStringAsync();
+                            var document = XDocument.Parse(_response);
+                            XElement? xml = document.Root;
+                            IEnumerable<XElement>? items = xml?.Descendants(d + "item");
+                            var mes = items?.ElementAt(nextAction-10)?.Element(d + "title")?.Value;
+                            mes += " " + items?.ElementAt(nextAction-10)?.Element(d + "link")?.Value;
+                            this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                        } else {
+                            this.mclient.Self.Chat("error", 0, ChatType.Normal);
+                        }
+                    }
+                } catch (Exception e) {
+                    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
+                }
+            }
+
+            this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+            this.mclient.Self.AnimationStop(Animations.TYPE, false);
+            MyApplication.lastChatDateTime = DateTime.Now;
         }
 
     }

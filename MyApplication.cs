@@ -173,6 +173,7 @@ namespace SecondBot.Client {
 
             switch (e.IM.Dialog) {
                 case InstantMessageDialog.RequestTeleport:
+                    this.loiter = false;
                     Console.WriteLine("Accepting teleport lure:" + e.IM.FromAgentName);
                     standupcommand.setCurrentAnims(this.currentAnims);
                     standupcommand.Execute(e.IM.FromAgentID, e.IM.FromAgentName, message, 1);
@@ -271,6 +272,7 @@ namespace SecondBot.Client {
                 standupcommand.Execute(fromUUID, fromName, message, type);
                 this.mclient.Self.AutoPilotCancel();
             } else if (message.Contains("テレポ")) {
+                this.loiter = false;
                 int index = message.IndexOf("テレポ");
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
@@ -493,8 +495,14 @@ namespace SecondBot.Client {
                 TimeSpan d = DateTime.Now - MyApplication.lastChatDateTime;
                 if (d.TotalSeconds > Constants.RANDOM_CHAT_TIMER) {
                     Console.WriteLine("ランダムな発言");
-                    idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
-                    idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
+                    Random r = new System.Random();
+                    int nextAction = r.Next(0, 3); // 0-2
+                    if (nextAction == 0) {
+                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
+                        idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
+                    } else {
+                        idletalkcommand.rondomMessage();
+                    }
                 }
             }
 
