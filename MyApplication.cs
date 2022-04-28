@@ -454,8 +454,20 @@ namespace SecondBot.Client {
                 animationcommand.play(danceanim);
             } else if (message.Contains("Second Life") || message.Contains("セカンドライフ")) {
                 this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
+            } else if (message.Contains("attach")) {
+                UUID itemUUid;
+                UUID.TryParse("0ba3cfeb-7417-7be4-0df9-1288625d5470", out itemUUid);
+                //FIX ME: item null
+                //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
+                InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
+                this.mclient.Appearance.Attach(item, AttachmentPoint.Default);
+            } else if (message.Contains("detach")) {
+                UUID itemUUid;
+                UUID.TryParse("0ba3cfeb-7417-7be4-0df9-1288625d5470", out itemUUid);
+                //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
+                InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
+                this.mclient.Appearance.Detach(item);
             } else if (message.Contains("デバッグ")) {
-
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
                 idletalkcommand.Execute(fromUUID, fromName, message, type);
