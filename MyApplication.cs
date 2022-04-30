@@ -37,6 +37,7 @@ namespace SecondBot.Client {
         string chatplus_agentname;
         string? mebo_apikey;
         string? mebo_agent_id;
+        string? script;
 
         ChatMode chatMode; // 0:指名モード 1:全レス
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
@@ -52,7 +53,10 @@ namespace SecondBot.Client {
         private AnimationCommand animationcommand;
         private CreateNotecardCommand createnotecardcommand;
 
-        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id) {
+        private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
+        private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
+
+        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? script) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
@@ -72,6 +76,7 @@ namespace SecondBot.Client {
             this.chatplus_agentname = chatplus_agentname;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
+            this.script = script;
 
             this.mclient = new MyClient();
             this.mclient.Settings.USE_LLSD_LOGIN = true; // LLSD or XML-RPC(古い形式)
@@ -109,6 +114,24 @@ namespace SecondBot.Client {
             this.movecommand = new MoveCommand(this.mclient);
             this.animationcommand = new AnimationCommand(this.mclient);
             this.createnotecardcommand = new CreateNotecardCommand(this.mclient);
+
+            this.scriptEngine = IronPython.Hosting.Python.CreateEngine();
+            this.scriptScope = scriptEngine.CreateScope();
+            this.scriptScope.SetVariable("mclient", this.mclient);
+            this.scriptScope.SetVariable("idletalkcommand", this.idletalkcommand);
+            this.scriptScope.SetVariable("standupcommand", this.standupcommand);
+            this.scriptScope.SetVariable("teleportcommand", this.teleportcommand);
+            this.scriptScope.SetVariable("movecommand", this.movecommand);
+            this.scriptScope.SetVariable("animationcommand", this.animationcommand);
+            this.scriptScope.SetVariable("createnotecardcommand", this.createnotecardcommand);
+            try {
+               this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                dynamic scriptInfo = this.scriptScope.GetVariable(@"scriptInfo");
+                var info = scriptInfo();
+                Console.WriteLine(info);
+            } catch(Exception e) {
+               Console.WriteLine(e.Message);
+            }
         }
 
         void MethodInvokedOnSigTerm(AssemblyLoadContext sender) {
@@ -120,6 +143,14 @@ namespace SecondBot.Client {
                 Console.WriteLine("Login success");
                 this.loiterStartRegionPos = this.mclient.Self.SimPosition;
                 this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                try {
+                this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic Network_OnLogin = this.scriptScope.GetVariable(@"Network_OnLogin");
+                    var info = Network_OnLogin();
+                    Console.WriteLine(info);
+                } catch(Exception ex) {
+                    Console.WriteLine(ex.Message);
+                }
             }
             else if (e.Status == LoginStatus.Failed) {
                 Console.WriteLine("Login Failed");
@@ -454,6 +485,15 @@ namespace SecondBot.Client {
                 animationcommand.play(danceanim);
             } else if (message.Contains("Second Life") || message.Contains("セカンドライフ")) {
                 this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
+            } else if (message.Contains("スクリプト")) {
+                try {
+                this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic scommand = this.scriptScope.GetVariable(@"command");
+                    var scommand_ = scommand(fromUUID, fromName, message, type);
+                    Console.WriteLine(scommand_);
+                } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                }
             } else if (message.Contains("デバッグ")) {
 
             } else {
