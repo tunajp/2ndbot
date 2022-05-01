@@ -492,7 +492,7 @@ namespace SecondBot.Client {
                     var scommand_ = scommand(fromUUID, fromName, message, type);
                     Console.WriteLine(scommand_);
                 } catch(Exception e) {
-                Console.WriteLine(e.Message);
+                    Console.WriteLine(e.Message);
                 }
             } else if (message.Contains("デバッグ")) {
 
