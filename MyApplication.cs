@@ -487,7 +487,7 @@ namespace SecondBot.Client {
                 this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
             } else if (message.Contains("スクリプト")) {
                 try {
-                this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
                     dynamic scommand = this.scriptScope.GetVariable(@"command");
                     var scommand_ = scommand(fromUUID, fromName, message, type);
                     Console.WriteLine(scommand_);
