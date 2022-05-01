@@ -494,6 +494,29 @@ namespace SecondBot.Client {
                 } catch(Exception e) {
                     Console.WriteLine(e.Message);
                 }
+            } else if (message.Contains("Appearance")) {
+                string[] args = new String[]{"Clothing/kani"}; // Clothing/kani
+                string appearance = args.Aggregate(string.Empty, (current, t) => current + (t + " "));
+                appearance = appearance.TrimEnd();
+
+                // FIX ME: フォルダが見つけられない
+                UUID folder = this.mclient.Inventory.FindObjectByPath(this.mclient.Inventory.Store.RootFolder.UUID, this.mclient.Self.AgentID, appearance, 20 * 1000);
+                if (folder == UUID.Zero) {
+                    Console.WriteLine("Outfit path " + appearance + " not found");
+                    return;
+                }
+                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folder, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                List<InventoryItem> items = new List<InventoryItem>();
+                if (contents == null) {
+                    Console.WriteLine("Failed to get contents of " + appearance);
+                    return;
+                }
+                foreach (InventoryBase item in contents)
+                {
+                    if (item is InventoryItem inventoryItem)
+                        items.Add(inventoryItem);
+                }
+                this.mclient.Appearance.ReplaceOutfit(items);
             } else if (message.Contains("デバッグ")) {
 
             } else {
