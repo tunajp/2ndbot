@@ -144,7 +144,7 @@ namespace SecondBot.Client {
                 this.loiterStartRegionPos = this.mclient.Self.SimPosition;
                 this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                 try {
-                this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
                     dynamic Network_OnLogin = this.scriptScope.GetVariable(@"Network_OnLogin");
                     var info = Network_OnLogin();
                     Console.WriteLine(info);
@@ -600,6 +600,15 @@ namespace SecondBot.Client {
 
 
             }
+            try {
+                this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                dynamic updateTimer_Elapsed = this.scriptScope.GetVariable(@"updateTimer_Elapsed");
+                var info = updateTimer_Elapsed();
+                //Console.WriteLine(info);
+            } catch(Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
         }
 
         private void findRandomObject() {

@@ -18,5 +18,10 @@ def command(fromUUID, fromName, message, type):
     else:
         mclient.Self.Chat(fromName + "IronPython", 0, ChatType.Normal)
 
+def updateTimer_Elapsed():
+    global x
+    x = x + 1
+    #print("timer", x)
+
 if __name__ == '__main__':
     print("main")
