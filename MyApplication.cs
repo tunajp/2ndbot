@@ -117,6 +117,7 @@ namespace SecondBot.Client {
 
             this.scriptEngine = IronPython.Hosting.Python.CreateEngine();
             this.scriptScope = scriptEngine.CreateScope();
+            this.scriptScope.SetVariable("application", this);
             this.scriptScope.SetVariable("mclient", this.mclient);
             this.scriptScope.SetVariable("idletalkcommand", this.idletalkcommand);
             this.scriptScope.SetVariable("standupcommand", this.standupcommand);
@@ -408,6 +409,8 @@ namespace SecondBot.Client {
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
             } else if (message.Contains("どこ")) {
                 string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();
+                Vector3 globalPos = this.getCurrentGlobalPosition();
+                mes += "\n" + "グローバル座標:" + globalPos.X + "," + globalPos.Y + "." + globalPos.Z;
                 if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
             } else if(message.Contains("チャンネルチャット")) {
@@ -750,6 +753,20 @@ namespace SecondBot.Client {
         void Frind_FrienshipOfferd(object? sender, FriendshipOfferedEventArgs e) {
             Console.WriteLine("Accepting Friendship:" + e.AgentName);
             this.mclient.Friends.AcceptFriendship(e.AgentID, e.SessionID);
+        }
+
+        public Vector3 getCurrentGlobalPosition() {
+            Vector3 pos = this.mclient.Self.SimPosition;
+            uint regionX, regionY;
+            foreach(var t in this.mclient.Network.Simulators) {
+                Utils.LongToUInts(t.Handle, out regionX, out regionY);
+                double xTarget = (double)this.loiterStartRegionPos.X + (double)regionX;
+                double yTarget = (double)this.loiterStartRegionPos.Y + (double)regionY;
+                double zTarget = this.loiterStartRegionPos.Z - 2f;
+                this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
+                return new Vector3((float)xTarget, (float)yTarget, (float)zTarget);
+            }
+            return Vector3.Zero;
         }
 
     }
