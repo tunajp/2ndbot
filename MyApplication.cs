@@ -52,6 +52,7 @@ namespace SecondBot.Client {
         private MoveCommand movecommand;
         private AnimationCommand animationcommand;
         private CreateNotecardCommand createnotecardcommand;
+        private InventoryListCommand inventorylistcommand;
 
         private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
         private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
@@ -114,6 +115,7 @@ namespace SecondBot.Client {
             this.movecommand = new MoveCommand(this.mclient);
             this.animationcommand = new AnimationCommand(this.mclient);
             this.createnotecardcommand = new CreateNotecardCommand(this.mclient);
+            this.inventorylistcommand = new InventoryListCommand(this.mclient);
 
             this.scriptEngine = IronPython.Hosting.Python.CreateEngine();
             this.scriptScope = scriptEngine.CreateScope();
@@ -497,6 +499,8 @@ namespace SecondBot.Client {
                 } catch(Exception e) {
                     Console.WriteLine(e.Message);
                 }
+            } else if (message.Contains("インベントリ表示")) {
+                this.inventorylistcommand.Execute(fromUUID, fromName, message, type);
             } else if (message.Contains("デバッグ")) {
 
             } else {
