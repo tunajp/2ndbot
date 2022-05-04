@@ -529,9 +529,10 @@ namespace SecondBot.Client {
                 //}
 
                 // ERROR - Failed to fetch the current agent wearables, cannot safely replace outfit
+                // AppearanceManager.cs if (needsCurrentWearables && !GetAgentWearables())
                 // kani 0b329337-02d8-0aad-4202-ece611bf500e
                 // nuko ef676e23-ea67-0abb-6e67-03e9d499e43a
-                UUID folderUUID = new UUID("ef676e23-ea67-0abb-6e67-03e9d499e43a");
+                UUID folderUUID = new UUID("0b329337-02d8-0aad-4202-ece611bf500e");
                 InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
                 this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
 
@@ -547,7 +548,11 @@ namespace SecondBot.Client {
                     if (item is InventoryItem inventoryItem)
                         items.Add(inventoryItem);
                 }
-                this.mclient.Appearance.ReplaceOutfit(items);
+                var lockSlim = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+                lockSlim.EnterWriteLock();
+                this.mclient.Appearance.ReplaceOutfit(items, false);
+                lockSlim.ExitWriteLock();
+                this.mclient.Appearance.RequestSetAppearance(true);
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
