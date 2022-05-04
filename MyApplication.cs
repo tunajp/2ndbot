@@ -93,6 +93,7 @@ namespace SecondBot.Client {
             this.mclient.Self.ScriptDialog += Self_ScriptDialog;
 
             this.mclient.Inventory.InventoryObjectOffered += Inventory_InventoryObjectOfferd;
+            this.mclient.Inventory.FolderUpdated += Inventory_OnFolderUpdated;
             this.mclient.Friends.FriendshipOffered += Frind_FrienshipOfferd;
             this.mclient.Objects.ObjectProperties += Objects_OnObjectProperties;
 
@@ -788,6 +789,10 @@ namespace SecondBot.Client {
         void Inventory_InventoryObjectOfferd(object? sender, InventoryObjectOfferedEventArgs e) {
             Console.WriteLine("Accepting InventoryOffer" + e.Offer.FromAgentName + " " + e.Offer.Message);
             e.Accept = true;
+        }
+
+        void Inventory_OnFolderUpdated(object sender, FolderUpdatedEventArgs e) {
+            this.inventorylistcommand.UpdateFolder(e.FolderID);
         }
         void Frind_FrienshipOfferd(object? sender, FriendshipOfferedEventArgs e) {
             Console.WriteLine("Accepting Friendship:" + e.AgentName);
