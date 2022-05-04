@@ -26,6 +26,7 @@ namespace SecondBot.Client {
                     String? chatplus_agentname = bot.Element("chatplus_agentname")?.Value;
                     String? mebo_apikey = bot.Element("mebo_apikey")?.Value;
                     String? mebo_agent_id = bot.Element("mebo_agent_id")?.Value;
+                    String? script = bot.Element("script")?.Value;
                     if (fistname == null || fistname.Length == 0
                         || lastname == null || lastname.Length == 0
                         || password == null || password.Length == 0
@@ -40,7 +41,7 @@ namespace SecondBot.Client {
                     if (start == null) start = "last";
 
                     Console.WriteLine(fistname + " " + lastname + " " + nickname +" ...starting");
-                    new MyApplication(fistname, lastname, password, start, nickname, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id);
+                    new MyApplication(fistname, lastname, password, start, nickname, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, script);
                     // アプリケーション数が0になったら終了する
                     myAppCount += 1;
                 }

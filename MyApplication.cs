@@ -37,6 +37,7 @@ namespace SecondBot.Client {
         string chatplus_agentname;
         string? mebo_apikey;
         string? mebo_agent_id;
+        string? script;
 
         ChatMode chatMode; // 0:指名モード 1:全レス
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
@@ -52,7 +53,10 @@ namespace SecondBot.Client {
         private AnimationCommand animationcommand;
         private CreateNotecardCommand createnotecardcommand;
 
-        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id) {
+        private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
+        private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
+
+        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? script) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
@@ -72,6 +76,7 @@ namespace SecondBot.Client {
             this.chatplus_agentname = chatplus_agentname;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
+            this.script = script;
 
             this.mclient = new MyClient();
             this.mclient.Settings.USE_LLSD_LOGIN = true; // LLSD or XML-RPC(古い形式)
@@ -109,6 +114,25 @@ namespace SecondBot.Client {
             this.movecommand = new MoveCommand(this.mclient);
             this.animationcommand = new AnimationCommand(this.mclient);
             this.createnotecardcommand = new CreateNotecardCommand(this.mclient);
+
+            this.scriptEngine = IronPython.Hosting.Python.CreateEngine();
+            this.scriptScope = scriptEngine.CreateScope();
+            this.scriptScope.SetVariable("application", this);
+            this.scriptScope.SetVariable("mclient", this.mclient);
+            this.scriptScope.SetVariable("idletalkcommand", this.idletalkcommand);
+            this.scriptScope.SetVariable("standupcommand", this.standupcommand);
+            this.scriptScope.SetVariable("teleportcommand", this.teleportcommand);
+            this.scriptScope.SetVariable("movecommand", this.movecommand);
+            this.scriptScope.SetVariable("animationcommand", this.animationcommand);
+            this.scriptScope.SetVariable("createnotecardcommand", this.createnotecardcommand);
+            try {
+               this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                dynamic scriptInfo = this.scriptScope.GetVariable(@"scriptInfo");
+                var info = scriptInfo();
+                Console.WriteLine(info);
+            } catch(Exception e) {
+               Console.WriteLine(e.Message);
+            }
         }
 
         void MethodInvokedOnSigTerm(AssemblyLoadContext sender) {
@@ -120,6 +144,14 @@ namespace SecondBot.Client {
                 Console.WriteLine("Login success");
                 this.loiterStartRegionPos = this.mclient.Self.SimPosition;
                 this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                try {
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic Network_OnLogin = this.scriptScope.GetVariable(@"Network_OnLogin");
+                    var info = Network_OnLogin();
+                    Console.WriteLine(info);
+                } catch(Exception ex) {
+                    Console.WriteLine(ex.Message);
+                }
             }
             else if (e.Status == LoginStatus.Failed) {
                 Console.WriteLine("Login Failed");
@@ -377,6 +409,8 @@ namespace SecondBot.Client {
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
             } else if (message.Contains("どこ")) {
                 string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();
+                Vector3 globalPos = this.getCurrentGlobalPosition();
+                mes += "\n" + "グローバル座標:" + globalPos.X + "," + globalPos.Y + "." + globalPos.Z;
                 if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                 else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
             } else if(message.Contains("チャンネルチャット")) {
@@ -467,6 +501,15 @@ namespace SecondBot.Client {
                 //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
                 InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
                 this.mclient.Appearance.Detach(item);
+            } else if (message.Contains("スクリプト")) {
+                try {
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic scommand = this.scriptScope.GetVariable(@"command");
+                    var scommand_ = scommand(fromUUID, fromName, message, type);
+                    Console.WriteLine(scommand_);
+                } catch(Exception e) {
+                    Console.WriteLine(e.Message);
+                }
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
@@ -572,6 +615,15 @@ namespace SecondBot.Client {
 
 
             }
+            try {
+                this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                dynamic updateTimer_Elapsed = this.scriptScope.GetVariable(@"updateTimer_Elapsed");
+                var info = updateTimer_Elapsed();
+                //Console.WriteLine(info);
+            } catch(Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
         }
 
         private void findRandomObject() {
@@ -713,6 +765,20 @@ namespace SecondBot.Client {
         void Frind_FrienshipOfferd(object? sender, FriendshipOfferedEventArgs e) {
             Console.WriteLine("Accepting Friendship:" + e.AgentName);
             this.mclient.Friends.AcceptFriendship(e.AgentID, e.SessionID);
+        }
+
+        public Vector3 getCurrentGlobalPosition() {
+            Vector3 pos = this.mclient.Self.SimPosition;
+            uint regionX, regionY;
+            foreach(var t in this.mclient.Network.Simulators) {
+                Utils.LongToUInts(t.Handle, out regionX, out regionY);
+                double xTarget = (double)this.loiterStartRegionPos.X + (double)regionX;
+                double yTarget = (double)this.loiterStartRegionPos.Y + (double)regionY;
+                double zTarget = this.loiterStartRegionPos.Z - 2f;
+                this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
+                return new Vector3((float)xTarget, (float)yTarget, (float)zTarget);
+            }
+            return Vector3.Zero;
         }
 
     }
