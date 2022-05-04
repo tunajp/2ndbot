@@ -43,6 +43,8 @@ namespace SecondBot.Client {
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
         private ManualResetEvent GroupsEvent = new ManualResetEvent(false);
 
+        private ManualResetEvent ItemEvent = new ManualResetEvent(false);
+
         Dictionary<UUID, Primitive> PrimsWaiting = new Dictionary<UUID, Primitive>();
         AutoResetEvent AllPropertiesReceived = new AutoResetEvent(false);
 
@@ -516,20 +518,28 @@ namespace SecondBot.Client {
             } else if (message.Contains("インベントリ表示")) {
                 this.inventorylistcommand.Execute(fromUUID, fromName, message, type);
             } else if (message.Contains("Appearance")) {
-                string[] args = new String[]{"Clothing/kani"}; // Clothing/kani
-                string appearance = args.Aggregate(string.Empty, (current, t) => current + (t + " "));
-                appearance = appearance.TrimEnd();
+                //string[] args = new String[]{"Clothing/kani"}; // Clothing/kani
+                //string appearance = args.Aggregate(string.Empty, (current, t) => current + (t + " "));
+                //appearance = appearance.TrimEnd();
+                //// FIX ME: フォルダが見つけられない
+                //UUID folder = this.mclient.Inventory.FindObjectByPath(this.mclient.Inventory.Store.RootFolder.UUID, this.mclient.Self.AgentID, appearance, 20 * 1000);
+                //if (folder == UUID.Zero) {
+                //    Console.WriteLine("Outfit path " + appearance + " not found");
+                //    return;
+                //}
 
-                // FIX ME: フォルダが見つけられない
-                UUID folder = this.mclient.Inventory.FindObjectByPath(this.mclient.Inventory.Store.RootFolder.UUID, this.mclient.Self.AgentID, appearance, 20 * 1000);
-                if (folder == UUID.Zero) {
-                    Console.WriteLine("Outfit path " + appearance + " not found");
-                    return;
-                }
-                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folder, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                // ERROR - Failed to fetch the current agent wearables, cannot safely replace outfit
+                // kani 0b329337-02d8-0aad-4202-ece611bf500e
+                // nuko ef676e23-ea67-0abb-6e67-03e9d499e43a
+                UUID folderUUID = new UUID("ef676e23-ea67-0abb-6e67-03e9d499e43a");
+                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+                ItemEvent.WaitOne(30000, false);
+                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
                 List<InventoryItem> items = new List<InventoryItem>();
                 if (contents == null) {
-                    Console.WriteLine("Failed to get contents of " + appearance);
+                    Console.WriteLine("Failed to get contents of " + "nuko");
                     return;
                 }
                 foreach (InventoryBase item in contents)
@@ -792,6 +802,7 @@ namespace SecondBot.Client {
         }
 
         void Inventory_OnFolderUpdated(object sender, FolderUpdatedEventArgs e) {
+            ItemEvent.Set();
             this.inventorylistcommand.UpdateFolder(e.FolderID);
         }
         void Frind_FrienshipOfferd(object? sender, FriendshipOfferedEventArgs e) {
