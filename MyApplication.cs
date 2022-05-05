@@ -491,21 +491,70 @@ namespace SecondBot.Client {
                 int next = r.Next(1, 7);
                 string danceanim = "DANCE" + next.ToString();
                 animationcommand.play(danceanim);
-            } else if (message.Contains("Second Life") || message.Contains("セカンドライフ")) {
+            } else if (message.Contains("Second Life") || message.Contains("SecondLife") || message.Contains("セカンドライフ")) {
                 this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
             } else if (message.Contains("attach")) {
-                UUID itemUUid;
-                UUID.TryParse("0ba3cfeb-7417-7be4-0df9-1288625d5470", out itemUUid);
-                //FIX ME: item null
+                UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
+                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+                ItemEvent.WaitOne(30000, false);
+                //UUID itemUUid = new UUID("0ba3cfeb-7417-7be4-0df9-1288625d5470"); // Fairy Wings I SUPPORT UKRAINE v11
+                ////FIX ME: item null
                 //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
-                InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
-                this.mclient.Appearance.Attach(item, AttachmentPoint.Default);
+                //if (item == null) {
+                //    Console.WriteLine("attach item is null");
+                //    return;
+                //}
+                ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
+                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                List<InventoryItem> items = new List<InventoryItem>();
+                if (contents == null) {
+                    Console.WriteLine("Failed to get contents of " + "Objects");
+                    return;
+                }
+                foreach (InventoryBase item in contents)
+                {
+                    if (item is InventoryItem inventoryItem) {
+                        items.Add(inventoryItem);
+                        if (inventoryItem.Name.Contains("Fairy Wings")) {
+                            this.mclient.Appearance.Attach(inventoryItem, AttachmentPoint.Default);
+                            Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
+                            break;
+                        }
+                    }
+                }
             } else if (message.Contains("detach")) {
-                UUID itemUUid;
-                UUID.TryParse("0ba3cfeb-7417-7be4-0df9-1288625d5470", out itemUUid);
+                UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
+                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+                ItemEvent.WaitOne(30000, false);
+                //UUID itemUUid = new UUID("0ba3cfeb-7417-7be4-0df9-1288625d5470"); // Fairy Wings I SUPPORT UKRAINE v11
+                ////FIX ME: item null
                 //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
-                InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
-                this.mclient.Appearance.Detach(item);
+                ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
+                //if (item == null) {
+                //    Console.WriteLine("detach item is null");
+                //    return;
+                //}
+                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                List<InventoryItem> items = new List<InventoryItem>();
+                if (contents == null) {
+                    Console.WriteLine("Failed to get contents of " + "Objects");
+                    return;
+                }
+                foreach (InventoryBase item in contents)
+                {
+                    if (item is InventoryItem inventoryItem) {
+                        items.Add(inventoryItem);
+                        if (inventoryItem.Name.Contains("Fairy Wings")) {
+                            this.mclient.Appearance.Detach(inventoryItem);
+                            Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
+                            break;
+                        }
+                    }
+                }
             } else if (message.Contains("スクリプト")) {
                 try {
                     this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
@@ -518,6 +567,8 @@ namespace SecondBot.Client {
             } else if (message.Contains("インベントリ表示")) {
                 this.inventorylistcommand.Execute(fromUUID, fromName, message, type);
             } else if (message.Contains("Appearance")) {
+                // CAUTION: 現在実装が不完全です
+
                 //string[] args = new String[]{"Clothing/kani"}; // Clothing/kani
                 //string appearance = args.Aggregate(string.Empty, (current, t) => current + (t + " "));
                 //appearance = appearance.TrimEnd();
