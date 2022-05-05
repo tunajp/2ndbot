@@ -494,7 +494,35 @@ namespace SecondBot.Client {
             } else if (message.Contains("Second Life") || message.Contains("SecondLife") || message.Contains("セカンドライフ")) {
                 this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
             } else if (message.Contains("attach")) {
-                UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
+                int index = message.IndexOf("attach");
+                int index2 = message.IndexOf(" ", index);
+                if (index2 == -1) {
+                    string mes = "アイテム名称を指定してください";
+                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    return;
+                }
+                string itemName = message.Substring(index2+1, message.Length - index2-1);
+                Console.WriteLine(itemName);
+
+                UUID folderUUID = UUID.Zero;
+                List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
+                if (contents != null) {
+                    foreach (InventoryBase i in contents) {
+                        if (i.Name == "Objects") {
+                            folderUUID = i.UUID;
+                            break;
+                        }
+                        //if (i is InventoryFolder folder) {
+                        //    // TODO: Nest
+                        //}
+                    }
+                } else {
+                    Console.WriteLine("Objects folder not found");
+                    return;
+                }
+
+                //UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
                 InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
                 this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
 
@@ -507,7 +535,7 @@ namespace SecondBot.Client {
                 //    return;
                 //}
                 ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
-                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                /*List<InventoryBase> */contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
                 List<InventoryItem> items = new List<InventoryItem>();
                 if (contents == null) {
                     Console.WriteLine("Failed to get contents of " + "Objects");
@@ -517,7 +545,7 @@ namespace SecondBot.Client {
                 {
                     if (item is InventoryItem inventoryItem) {
                         items.Add(inventoryItem);
-                        if (inventoryItem.Name.Contains("Fairy Wings")) {
+                        if (inventoryItem.Name.Contains(itemName)) {
                             this.mclient.Appearance.Attach(inventoryItem, AttachmentPoint.Default);
                             Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
                             break;
@@ -525,7 +553,34 @@ namespace SecondBot.Client {
                     }
                 }
             } else if (message.Contains("detach")) {
-                UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
+                int index = message.IndexOf("detach");
+                int index2 = message.IndexOf(" ", index);
+                if (index2 == -1) {
+                    string mes = "アイテム名称を指定してください";
+                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    return;
+                }
+                string itemName = message.Substring(index2+1, message.Length - index2-1);
+                Console.WriteLine(itemName);
+
+                UUID folderUUID = UUID.Zero;
+                List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
+                if (contents != null) {
+                    foreach (InventoryBase i in contents) {
+                        if (i.Name == "Objects") {
+                            folderUUID = i.UUID;
+                            break;
+                        }
+                        //if (i is InventoryFolder folder) {
+                        //    // TODO: Nest
+                        //}
+                    }
+                } else {
+                    Console.WriteLine("Objects folder not found");
+                    return;
+                }
+                //UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
                 InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
                 this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
 
@@ -538,7 +593,7 @@ namespace SecondBot.Client {
                 //    Console.WriteLine("detach item is null");
                 //    return;
                 //}
-                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                /*List<InventoryBase> */contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
                 List<InventoryItem> items = new List<InventoryItem>();
                 if (contents == null) {
                     Console.WriteLine("Failed to get contents of " + "Objects");
@@ -548,7 +603,7 @@ namespace SecondBot.Client {
                 {
                     if (item is InventoryItem inventoryItem) {
                         items.Add(inventoryItem);
-                        if (inventoryItem.Name.Contains("Fairy Wings")) {
+                        if (inventoryItem.Name.Contains(itemName)) {
                             this.mclient.Appearance.Detach(inventoryItem);
                             Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
                             break;
