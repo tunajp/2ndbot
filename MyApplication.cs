@@ -38,6 +38,7 @@ namespace SecondBot.Client {
         string? mebo_apikey;
         string? mebo_agent_id;
         string? script;
+        string owner;
 
         ChatMode chatMode; // 0:指名モード 1:全レス
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
@@ -59,7 +60,7 @@ namespace SecondBot.Client {
         private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
         private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
 
-        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? script) {
+        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? script, string owner) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
@@ -80,6 +81,7 @@ namespace SecondBot.Client {
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
             this.script = script;
+            this.owner = owner;
 
             this.mclient = new MyClient();
             this.mclient.Settings.USE_LLSD_LOGIN = true; // LLSD or XML-RPC(古い形式)
@@ -331,6 +333,12 @@ namespace SecondBot.Client {
                 teleportcommand.Execute(fromUUID, fromName, message, type);
 
             } else if (message.Contains("終了")) {
+                if (fromName != this.owner) {
+                    string mes = "Exit order revoked.";
+                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    return;
+                }
                 this.mclient.Network.Logout();
             } else if (message.Contains("グループ")) {
                 // グループタグに関係しそうなとこ
@@ -493,7 +501,49 @@ namespace SecondBot.Client {
                 animationcommand.play(danceanim);
             } else if (message.Contains("Second Life") || message.Contains("SecondLife") || message.Contains("セカンドライフ")) {
                 this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
+            } else if (message.Contains("アイテムリスト")) {
+                UUID folderUUID = UUID.Zero;
+                List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
+                if (contents != null) {
+                    foreach (InventoryBase i in contents) {
+                        if (i.Name == "Objects") {
+                            folderUUID = i.UUID;
+                            break;
+                        }
+                        //if (i is InventoryFolder folder) {
+                        //    // TODO: Nest
+                        //}
+                    }
+                } else {
+                    Console.WriteLine("Objects folder not found");
+                    return;
+                }
+
+                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+                ItemEvent.WaitOne(30000, false);
+                List<InventoryItem> items = new List<InventoryItem>();
+                contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+                if (contents == null) {
+                    Console.WriteLine("Failed to get contents of " + "Objects");
+                    return;
+                }
+                string mes = "";
+                foreach (InventoryBase item in contents)
+                {
+                    mes += item.Name + ",\n";
+                }
+                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+
             } else if (message.Contains("attach")) {
+                if (fromName != this.owner) {
+                    string mes = "attach order revoked.";
+                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    return;
+                }
                 int index = message.IndexOf("attach");
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {

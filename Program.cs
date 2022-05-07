@@ -27,21 +27,23 @@ namespace SecondBot.Client {
                     String? mebo_apikey = bot.Element("mebo_apikey")?.Value;
                     String? mebo_agent_id = bot.Element("mebo_agent_id")?.Value;
                     String? script = bot.Element("script")?.Value;
+                    String? owner = bot.Element("owner")?.Value;
                     if (fistname == null || fistname.Length == 0
                         || lastname == null || lastname.Length == 0
                         || password == null || password.Length == 0
                         || nickname == null || nickname.Length == 0
                         || chatplus_apikey == null || chatplus_apikey.Length == 0
                         || chatplus_agentname == null || chatplus_agentname.Length == 0
+                        || owner == null || owner.Length == 0
                         ) {
-                        Console.WriteLine("Required fields are not set(fistname,lastname,password,nickname,chatplus_apikey,chatplus_agentname in .settings.xml)");
+                        Console.WriteLine("Required fields are not set(fistname,lastname,password,nickname,chatplus_apikey,chatplus_agentname,owner in .settings.xml)");
                         Environment.Exit(0);
                         return;
                     }
                     if (start == null) start = "last";
 
                     Console.WriteLine(fistname + " " + lastname + " " + nickname +" ...starting");
-                    new MyApplication(fistname, lastname, password, start, nickname, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, script);
+                    new MyApplication(fistname, lastname, password, start, nickname, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, script,owner);
                     // アプリケーション数が0になったら終了する
                     myAppCount += 1;
                 }
