@@ -539,7 +539,7 @@ namespace SecondBot.Client {
 
             } else if (message.Contains("attach")) {
                 if (fromName != this.owner) {
-                    string mes = "attach order revoked.";
+                    string mes = "attach order revoked." + fromName + "," + this.owner;
                     if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
                     else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
                     return;
@@ -709,6 +709,20 @@ namespace SecondBot.Client {
                 this.mclient.Appearance.ReplaceOutfit(items, false);
                 lockSlim.ExitWriteLock();
                 this.mclient.Appearance.RequestSetAppearance(true);
+            } else if (message.Contains("shoot")) {
+                this.mclient.Self.Movement.Mouselook = true;
+                this.mclient.Self.Movement.MLButtonDown = true;
+                this.mclient.Self.Movement.SendUpdate();
+
+                this.mclient.Self.Movement.MLButtonUp = true;
+                this.mclient.Self.Movement.MLButtonDown = false;
+                this.mclient.Self.Movement.FinishAnim = true;
+                this.mclient.Self.Movement.SendUpdate();
+
+                this.mclient.Self.Movement.Mouselook = false;
+                this.mclient.Self.Movement.MLButtonUp = false;
+                this.mclient.Self.Movement.FinishAnim = false;
+                this.mclient.Self.Movement.SendUpdate();
             } else if (message.Contains("デバッグ")) {
             } else {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
