@@ -190,6 +190,10 @@ namespace SecondBot.Client {
             //    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
             //}
             Console.WriteLine("発言者:" + e.SourceID + " ," + this.nickname + ":" + this.mclient.Self.AgentID);
+            if (e.SourceType != ChatSourceType.Agent) {
+                Console.WriteLine("Ignore this as it is not a chat from agent.");
+                return;
+            }
             if (e.Message.Length > 0 && e.SourceID != this.mclient.Self.AgentID) {
                 string message = e.Message;
                 message = message.Trim();
