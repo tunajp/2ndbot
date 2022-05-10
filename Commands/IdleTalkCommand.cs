@@ -70,7 +70,7 @@ namespace SecondBot.Client {
             this.mebo_agent_id = mebo_agent_id;
         }
 
-        private bool IsJapanese(string text) {
+        public bool IsJapanese(string text) {
             var isJapanese = Regex.IsMatch(text, @"[\p{IsHiragana}\p{IsKatakana}\p{IsCJKUnifiedIdeographs}]+");
             if (!isJapanese) {
                 // 半角カタカナ
