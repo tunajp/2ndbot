@@ -236,6 +236,9 @@ namespace SecondBot.Client {
                         this.command(e.IM.FromAgentID, e.IM.FromAgentName, message, 1);
                     }
                     break;
+                case InstantMessageDialog.GroupInvitation:
+                    Console.WriteLine("GroupInvitation:" + e.IM.FromAgentID + " " + e.IM.FromAgentName + " " + e.IM.Message);
+                    break;
                 default:
                     Console.WriteLine("ignored:" + e.IM.FromAgentID + " " + e.IM.FromAgentName + " " + e.IM.Message);
                     break;
