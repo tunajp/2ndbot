@@ -100,7 +100,7 @@ namespace SecondBot.Client {
             this.mclient.Inventory.FolderUpdated += Inventory_OnFolderUpdated;
             this.mclient.Friends.FriendshipOffered += Frind_FrienshipOfferd;
             this.mclient.Objects.ObjectProperties += Objects_OnObjectProperties;
-
+            this.mclient.Groups.GroupInvitation += Group_GroupInvitation;
             string firstName = firstname;
             string lastName = lastname;
             string password = pass;
@@ -990,6 +990,13 @@ namespace SecondBot.Client {
         void Frind_FrienshipOfferd(object? sender, FriendshipOfferedEventArgs e) {
             Console.WriteLine("Accepting Friendship:" + e.AgentName);
             this.mclient.Friends.AcceptFriendship(e.AgentID, e.SessionID);
+        }
+
+        void Group_GroupInvitation(object?sender, GroupInvitationEventArgs e) {
+            Console.WriteLine("GroupInvitation:" + e.FromName + "," + e.Message);
+            // TODO:グループ招待をどうするかOwnerにIMを送信して返事で決めさせる
+            //e.Accept = true;
+            e.Accept = false;
         }
 
         public Vector3 getCurrentGlobalPosition() {
