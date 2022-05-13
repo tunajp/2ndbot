@@ -287,6 +287,10 @@ namespace SecondBot.Client {
 
                     if (targetPrim != null) {
                         this.mclient.Self.Touch(targetPrim.LocalID);
+                    } else {
+                        string mes = "オブジェクトが見つかりませんでした";
+                        if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
                     }
                 }
             } else if (message.Contains("休")) {
@@ -462,6 +466,36 @@ namespace SecondBot.Client {
 
                 // MEGABOLTの実装
                 //this.mclient.Self.ReplyToScriptDialog(ed.Channel, butindex, butlabel, ed.ObjectID);
+            } else if (message.Contains("ボタンクリック")) {
+                string mes = "";
+                int index = message.IndexOf("ボタンクリック");
+                int index2 = message.IndexOf(" ", index);
+                string arrString = message.Substring(index2+1, message.Length - index2-1);
+                string[] arr =  arrString.Split(' ');
+
+                if (arr.Length == 0) {
+                    mes = "チャンネル番号を指定してください";
+                } else if (arr.Length == 1) {
+                    mes = "インデックスを指定してください";
+                } else if (arr.Length == 2) {
+                    mes = "ボタン名を指定してください";
+                } else if (arr.Length == 3) {
+                    mes = "オブジェクトIDを指定してください";
+                }
+                if (mes.Length > 0) {
+                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    return;
+                }
+                string channel = arr[0];
+                string btnIndex = arr[1];
+                string btnLabel = arr[2];
+                string objectId = arr[3];
+                //mes = channel + "," + btnIndex + "," + btnLabel + "," + objectId;
+                //if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                //else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+
+                this.mclient.Self.ReplyToScriptDialog(Int32.Parse(channel), Int32.Parse(btnIndex), btnLabel, UUID.Parse(objectId));
             } else if (message.Contains("前へ")) {
                 movecommand.Forward();
             } else if (message.Contains("後ろへ")) {
@@ -969,13 +1003,15 @@ namespace SecondBot.Client {
 
         void Self_ScriptDialog(object? sender, ScriptDialogEventArgs e) {
             this.mclient.Self.Chat("チャンネル:" + e.Channel.ToString() + ",オブジェクトID:" + e.ObjectID, 0, ChatType.Normal);
-            string mes = "インデックス:ボタン名:";
+            string mes = "インデックス:ボタン名: ";
+            int i=0;
             foreach(var label in e.ButtonLabels) {
-                mes += label + ",";
+                mes += i.ToString() + ":" + label + ",";
+                i++;
             }
             this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-            this.mclient.Self.Chat("チャンネルチャット チャンネル番号 ボタン名称", 0, ChatType.Normal);
-
+            //this.mclient.Self.Chat("チャンネルチャット チャンネル番号 ボタン名称", 0, ChatType.Normal);
+            this.mclient.Self.Chat("ボタンクリック チャンネル番号 インデックス ボタン名 オブジェクトID", 0, ChatType.Normal);
         }
 
         void Inventory_InventoryObjectOfferd(object? sender, InventoryObjectOfferedEventArgs e) {
