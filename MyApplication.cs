@@ -200,6 +200,18 @@ namespace SecondBot.Client {
 
                 Console.WriteLine(message);
 
+                bool continueCommand = true;
+                try {
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic chatBeforHook = this.scriptScope.GetVariable(@"chatBeforHook");
+                    continueCommand = chatBeforHook(e.SourceID, e.FromName, message, 0);
+                } catch(Exception ex) {
+                    Console.WriteLine(ex.Message);
+                }
+                if (!continueCommand) {
+                    return;
+                }
+
                 if (message.Trim().StartsWith(this.nickname)) {
                     message = message.Replace("　", " ");
                     this.command(e.SourceID, e.FromName, message, 0);
@@ -812,6 +824,16 @@ namespace SecondBot.Client {
                     Random r = new System.Random();
                     int nextAction = r.Next(0, 3); // 0-2
                     if (nextAction == 0) {
+                        int ramdomGestureNum = r.Next(0, 10); // 0-9
+                        try {
+                            this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                            dynamic randomGesture = this.scriptScope.GetVariable(@"randomGesture");
+                            randomGesture(ramdomGestureNum);
+                            MyApplication.lastChatDateTime = DateTime.Now;
+                        } catch(Exception ex) {
+                            Console.WriteLine(ex.Message);
+                        }
+                    } else if (nextAction == 1) {
                         idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
                         idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
                     } else {
