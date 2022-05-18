@@ -258,6 +258,7 @@ namespace SecondBot.Client {
         }
 
         async void command(UUID fromUUID, string fromName, string message ,int type) {
+            bool idleTalkExecute = false;
             if (message.Contains("コマンド") || message.Contains("ヘルプ") || message.Contains("一覧")) {
                 string commandList = Constants.COMMANDS;
                 if (type == 0) this.mclient.Self.Chat(commandList, 0, ChatType.Normal);
@@ -713,15 +714,6 @@ namespace SecondBot.Client {
                         }
                     }
                 }
-            } else if (message.Contains("スクリプト")) {
-                try {
-                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
-                    dynamic scommand = this.scriptScope.GetVariable(@"command");
-                    var scommand_ = scommand(fromUUID, fromName, message, type);
-                    Console.WriteLine(scommand_);
-                } catch(Exception e) {
-                    Console.WriteLine(e.Message);
-                }
             } else if (message.Contains("インベントリ表示")) {
                 this.inventorylistcommand.Execute(fromUUID, fromName, message, type);
             } else if (message.Contains("Appearance")) {
@@ -778,6 +770,15 @@ namespace SecondBot.Client {
                 this.mclient.Self.Movement.SendUpdate();
             } else if (message.Contains("デバッグ")) {
             } else {
+                try {
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic scommand = this.scriptScope.GetVariable(@"command");
+                    idleTalkExecute = scommand(fromUUID, fromName, message, type);
+                } catch(Exception e) {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            if(idleTalkExecute) {
                 idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
                 idletalkcommand.Execute(fromUUID, fromName, message, type);
             }

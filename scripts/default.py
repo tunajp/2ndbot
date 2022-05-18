@@ -51,17 +51,20 @@ def chatBeforHook(fromUUID, fromName, message, type):
 
 def command(fromUUID, fromName, message, type):
     if "テスト" in message:
-        mclient.Self.Chat(fromName + "テスト", 0, ChatType.Normal)
+        mclient.Self.Chat(fromName + " テスト", 0, ChatType.Normal)
+        return False
     elif "NPC" in message:
         #pass
         Console.WriteLine("NPC")
         standupcommand.Execute(UUID.Zero, "", "", 0)
         mclient.Self.AutoPilot(263911.29400634766,248179.05200195312,21.72664451599121)
-    elif "グローバル" in message:
+        return False
+    elif "グローバル座標" in message:
         pos = application.getCurrentGlobalPosition()
         print(pos)
+        return False
     else:
-        mclient.Self.Chat(fromName + "IronPython", 0, ChatType.Normal)
+        return True
 
 # 1sec Elapsed
 def updateTimer_Elapsed():
