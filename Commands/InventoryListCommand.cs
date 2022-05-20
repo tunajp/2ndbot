@@ -4,8 +4,8 @@ using System.Text;
 namespace SecondBot.Client {
     public class InventoryListCommand : Command {
 
-        private Inventory Inventory;
-        private InventoryManager Manager;
+        //private Inventory Inventory;
+        //private InventoryManager Manager;
 
         public InventoryListCommand(MyClient mclient) {
             this.mclient = mclient;

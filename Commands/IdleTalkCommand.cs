@@ -224,6 +224,7 @@ namespace SecondBot.Client {
                             var _response = await response.Content.ReadAsStringAsync();
                             var document = XDocument.Parse(_response);
                             XElement? xml = document.Root;
+                            if (xml == null) return;
                             XElement? channel = xml.Element("channel");
                             IEnumerable<XElement>? items = channel?.Elements("item");
                             var mes = items?.ElementAt(nextAction)?.Element("title")?.Value;

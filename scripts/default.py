@@ -36,6 +36,7 @@ def Network_OnLogin():
 # qawsedrftgyhujikolp f364e06e-b6b4-a1f1-b90f-c1d82ffda937
 # そうだね 1168242e-6618-8f4d-3ef8-e0f96a19e4ac
 # 手遅れだと思います 7e2848ed-607e-ee8d-b886-dfb955aa878a
+# 寝たら死ぬぞ 7ce31c3b-437a-cd46-e360-738df8c8e211
 def chatBeforHook(fromUUID, fromName, message, type):
     if "うさうさ❤" in message:
         Thread.Sleep(1000)
@@ -44,6 +45,10 @@ def chatBeforHook(fromUUID, fromName, message, type):
     elif "もさもさ❤" in message:
         Thread.Sleep(1000)
         mclient.Self.PlayGesture(UUID("35d735ea-8902-2b4c-46b6-70e27954af7e"))
+        return False
+    elif "寝ます" in message:
+        Thread.Sleep(1000)
+        mclient.Self.PlayGesture(UUID("7ce31c3b-437a-cd46-e360-738df8c8e211"))
         return False
     else:
         return True

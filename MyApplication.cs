@@ -785,7 +785,8 @@ namespace SecondBot.Client {
 
         }
 
-        private Primitive getNextPrim() {
+        private Primitive? getNextPrim() {
+            if (this.MovementTargetPrims == null) return null;
             int primsCount = MovementTargetPrims.Count;
             Random r = new System.Random();
             int next = r.Next(0, primsCount);
@@ -877,7 +878,7 @@ namespace SecondBot.Client {
                         }
                     } else {
                         this.findRandomObject();
-                        Primitive targetPrim = this.getNextPrim();
+                        Primitive? targetPrim = this.getNextPrim();
                         if (targetPrim != null) {
                             Console.WriteLine("Sit->" + targetPrim.Properties.Name);
                             //this.mclient.Self.Touch(targetPrim.LocalID);
@@ -946,7 +947,7 @@ namespace SecondBot.Client {
         {
             lock (PrimsWaiting)
             {
-                Primitive prim;
+                Primitive? prim;
                 if (PrimsWaiting.TryGetValue(e.Properties.ObjectID, out prim))
                 {
                     prim.Properties = e.Properties;
@@ -1042,7 +1043,7 @@ namespace SecondBot.Client {
             e.Accept = true;
         }
 
-        void Inventory_OnFolderUpdated(object sender, FolderUpdatedEventArgs e) {
+        void Inventory_OnFolderUpdated(object? sender, FolderUpdatedEventArgs e) {
             ItemEvent.Set();
             this.inventorylistcommand.UpdateFolder(e.FolderID);
         }
