@@ -47,6 +47,10 @@ def chatBeforHook(fromUUID, fromName, message, type):
         Thread.Sleep(1000)
         mclient.Self.PlayGesture(UUID("35d735ea-8902-2b4c-46b6-70e27954af7e"))
         return False
+    elif "くまくま❤" in message:
+        Thread.Sleep(1000)
+        mclient.Self.PlayGesture(UUID("7ce31c3b-437a-cd46-e360-738df8c8e211"))
+        return False
     elif "寝ます" in message:
         Thread.Sleep(1000)
         mclient.Self.PlayGesture(UUID("7ce31c3b-437a-cd46-e360-738df8c8e211"))
