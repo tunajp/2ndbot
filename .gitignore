@@ -1,5 +1,6 @@
 .vscode
 bin
 obj
+log
 .settings.xml
 openmetaverse_data

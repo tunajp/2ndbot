@@ -49,6 +49,8 @@ namespace SecondBot.Client {
         Dictionary<UUID, Primitive> PrimsWaiting = new Dictionary<UUID, Primitive>();
         AutoResetEvent AllPropertiesReceived = new AutoResetEvent(false);
 
+        private Logger logger;
+
         private IdleTalkCommand idletalkcommand;
         private StandupCommand standupcommand;
         private TeleportCommand teleportcommand;
@@ -63,6 +65,8 @@ namespace SecondBot.Client {
         public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? script, string owner) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
+
+            this.logger = new Logger(firstname + "_" + lastname);
 
             this.chatMode = ChatMode.Nominate;
             this.chatApi = ChatApi.chatplus;
@@ -186,6 +190,7 @@ namespace SecondBot.Client {
         }
 
         void Self_ChatFromSimulator(object? sender, ChatEventArgs e) {
+            if (e.Message.Length > 0) this.logger.ChatLog(e.FromName + ":" + e.Message);
             //if (e.Message.Length > 0 && (this.mclient.MasterKey == e.SourceID || (this.mclient.MasterName == e.FromName && !this.mclient.AllowObjectMaster))) {
             //    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
             //}
@@ -245,6 +250,7 @@ namespace SecondBot.Client {
                 case InstantMessageDialog.MessageFromAgent:
                     Console.WriteLine(e.IM.FromAgentID + " " + e.IM.FromAgentName + " " + e.IM.Message);
                     if (e.IM.Message.Trim().Length > 0 && !e.IM.Message.Contains("typing")) {
+                        this.logger.IMLog(e.IM.FromAgentName, e.IM.Message);
                         this.command(e.IM.FromAgentID, e.IM.FromAgentName, message, 1);
                     }
                     break;
