@@ -37,6 +37,7 @@ def Network_OnLogin():
 # そうだね 1168242e-6618-8f4d-3ef8-e0f96a19e4ac
 # 手遅れだと思います 7e2848ed-607e-ee8d-b886-dfb955aa878a
 # 寝たら死ぬぞ 7ce31c3b-437a-cd46-e360-738df8c8e211
+# また髪の話してる f28fd398-26ce-5bdc-976d-7e53bd9c478d
 def chatBeforHook(fromUUID, fromName, message, type):
     if "うさうさ❤" in message:
         Thread.Sleep(1000)
@@ -50,10 +51,15 @@ def chatBeforHook(fromUUID, fromName, message, type):
         Thread.Sleep(1000)
         mclient.Self.PlayGesture(UUID("7ce31c3b-437a-cd46-e360-738df8c8e211"))
         return False
+    elif "髪" in message:
+        Thread.Sleep(1000)
+        mclient.Self.PlayGesture(UUID("f28fd398-26ce-5bdc-976d-7e53bd9c478d"))
+        return False
     else:
         return True
     return True
 
+# chat command extension
 def command(fromUUID, fromName, message, type):
     if "テスト" in message:
         mclient.Self.Chat(fromName + " テスト", 0, ChatType.Normal)
