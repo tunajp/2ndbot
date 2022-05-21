@@ -12,5 +12,9 @@ namespace SecondBot.Client {
 
         public const string NOTECARD_TEXT_FILENAME = "notecard.txt";
         public const int NOTECARD_CREATE_TIMEOUT = 1000 * 10;
+
+        public const string LOGDIR = "log";
+        public const string CHATLOGFILE = "chat.txt";
+        public const string LOGFILE = "log.txt";
     }
 }
