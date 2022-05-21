@@ -9,6 +9,7 @@ namespace SecondBot.Client {
         public Logger(string username) {
             if (username.Contains("..")) {
                 Console.WriteLine("error...contains \"..\"");
+                Environment.Exit(0);
             }
             this.userDirectory = username;
             this.mkdir(Constants.LOGDIR);
@@ -55,6 +56,7 @@ namespace SecondBot.Client {
         public void IMLog(string from, string message) {
             if (from.Contains("..")) {
                 Console.WriteLine("error...contains \"..\"");
+                return;
             }
             try {
                 string filename =  this.userDirectory + from + ".txt";
