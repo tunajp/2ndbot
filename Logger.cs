@@ -7,6 +7,9 @@ namespace SecondBot.Client {
     public class Logger {
         string userDirectory;
         public Logger(string username) {
+            if (username.Contains("..")) {
+                Console.WriteLine("error...contains \"..\"");
+            }
             this.userDirectory = username;
             this.mkdir(Constants.LOGDIR);
             this.userDirectory = Constants.LOGDIR + Path.DirectorySeparatorChar + this.userDirectory + Path.DirectorySeparatorChar;
@@ -50,6 +53,9 @@ namespace SecondBot.Client {
             }
         }
         public void IMLog(string from, string message) {
+            if (from.Contains("..")) {
+                Console.WriteLine("error...contains \"..\"");
+            }
             try {
                 string filename =  this.userDirectory + from + ".txt";
                 using (StreamWriter writer = new StreamWriter(filename, true)) {
