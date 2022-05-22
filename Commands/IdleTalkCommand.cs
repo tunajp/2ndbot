@@ -96,9 +96,9 @@ namespace SecondBot.Client {
             Vector3? targetPos = MyApplication.getTargetPos(this.mclient, fromName);
             if (targetPos != null) {
                 Vector3 newDirection;
-                newDirection.X = (float)targetPos?.X;
-                newDirection.Y = (float)targetPos?.Y;
-                newDirection.Z = (float)targetPos?.Z;
+                newDirection.X = (float)targetPos?.X!;
+                newDirection.Y = (float)targetPos?.Y!;
+                newDirection.Z = (float)targetPos?.Z!;
                 this.mclient.Self.Movement.TurnToward(newDirection);
                 this.mclient.Self.Movement.SendUpdate(false);
             }
