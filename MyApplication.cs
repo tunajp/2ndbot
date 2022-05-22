@@ -986,19 +986,32 @@ namespace SecondBot.Client {
                 lock(this.mclient.Network.Simulators) {
                     //Console.WriteLine(followTarget);
                     foreach(var t in this.mclient.Network.Simulators) {
+                        //Console.WriteLine(t.Name); // MEMO:Simulatorsは現在いるリージョンを含め十字に5個のリージョンが返ってくる
                         Avatar targetAv = t.ObjectsAvatars.Find(avatar => avatar.Name == followTarget);
 
                         //Avatar targetAv;
                         ////t.ObjectAvatarsはUUIDじゃないのか・・・
                         //if (t.ObjectsAvatars.TryGetValue(followTarget, out targetAv)) {
                         //}
+
+                        // MEMO:追いかけてる途中でリージョンをまたいた場合と、別のリージョンから呼びかけた場合で挙動が異なる
+                        // 追いかけてる途中でリージョンをまたぐと、ターゲットがすべてのSimulatarsから全く見つからなくなる
+                        // おそらくアバターのアップデート情報を取得する必要があると思われる
+                        // 別のリージョンから呼びかけた場合、別のSimulatorでターゲットアバターが見つかるので、
+                        // FIXME: Calculate global distancesを対処すればいいと思われる
+                        // 全く別の問題として、アバターが見えない区画設定になっている場所へ移動するとターゲットアバターが見つからなくなる問題があるが、解決方法は多分ない
+                        //if (targetAv == null) {
+                        //    Console.WriteLine("follow missing:" + targetAv + " in " + t.Name);
+                        //}
                         if (targetAv != null) {
                             float DISTANCE_BUFFER = 1.0f;
                             float distance = 0.0f;
                             if (t == this.mclient.Network.CurrentSim) {
                                 distance = Vector3.Distance(targetAv.Position, mclient.Self.SimPosition);
+                                //Console.WriteLine(distance.ToString());
                             } else {
                                 // FIXME: Calculate global distances
+                                Console.WriteLine("target->" + t.Name + "," + "current->" + this.mclient.Network.CurrentSim.Name);
                             }
 
                             if (distance > DISTANCE_BUFFER) {
