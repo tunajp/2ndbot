@@ -105,6 +105,13 @@ namespace SecondBot.Client {
             this.mclient.Friends.FriendshipOffered += Frind_FrienshipOfferd;
             this.mclient.Objects.ObjectProperties += Objects_OnObjectProperties;
             this.mclient.Groups.GroupInvitation += Group_GroupInvitation;
+
+            // https://github.com/cinderblocks/libremetaverse/blob/master/LibreMetaverse.GUI/AvatarList.cs
+            this.mclient.Grid.CoarseLocationUpdate += Grid_CoarseLocationUpdate;
+            this.mclient.Network.SimChanged += Network_OnCurrentSimChanged;
+            this.mclient.Objects.AvatarUpdate += Objects_OnNewAvatar;
+            this.mclient.Objects.TerseObjectUpdate += Objects_OnObjectUpdated;
+
             string firstName = firstname;
             string lastName = lastname;
             string password = pass;
@@ -965,6 +972,29 @@ namespace SecondBot.Client {
             }
         }
 
+        void Network_OnCurrentSimChanged(object? sender, SimChangedEventArgs e) {
+            Console.WriteLine("OnCurrentSimChanged:" + e.ToString());
+        }
+        void Grid_CoarseLocationUpdate(object? sender, CoarseLocationUpdateEventArgs e) {
+            List<UUID> newEntries = e.NewEntries;
+            foreach(UUID t in newEntries) {
+                Console.WriteLine("Grid_CoarseLocationUpdate:" + e.Simulator.Name + "," + t.ToString());
+            }
+        }
+        void Objects_OnNewAvatar(object? sender, AvatarUpdateEventArgs e)
+        {
+            //Console.WriteLine("OnNewAvatar:" + e.Avatar.Name);
+        }
+
+        void Objects_OnObjectUpdated(object? sender, TerseObjectUpdateEventArgs e)
+        {
+            if (e.Update.Avatar) {
+                Avatar av;
+                e.Simulator.ObjectsAvatars.TryGetValue(e.Update.LocalID, out av);
+                //Console.WriteLine("OnObjectUpdated:" + av.Name);
+            }
+        }
+
         public static Vector3? getTargetPos(MyClient client,string targetName) {
             if (targetName != null) {
                 lock(client.Network.Simulators) {
@@ -1004,6 +1034,8 @@ namespace SecondBot.Client {
                         //    Console.WriteLine("follow missing:" + targetAv + " in " + t.Name);
                         //}
                         if (targetAv != null) {
+                            //Console.WriteLine("Target:" + (double)targetAv.Position.X + "," + (double)targetAv.Position.Y); // 231.68441772460938,118.41368103027344
+
                             float DISTANCE_BUFFER = 1.0f;
                             float distance = 0.0f;
                             if (t == this.mclient.Network.CurrentSim) {
