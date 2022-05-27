@@ -20,8 +20,7 @@ namespace SecondBot.Client {
                 result.AppendLine(key);
             }
             string mes = result.ToString();
-            if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-            else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+            this.mclient.Say(fromUUID, mes, 0, type);
 
         }
 

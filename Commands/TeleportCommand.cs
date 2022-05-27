@@ -21,16 +21,14 @@ namespace SecondBot.Client {
                     !float.TryParse(tokens[3], out z))
                 {
                     string mes = "Usage: goto sim/x/y/z";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
 
                     return;
                 }
                 if (this.mclient.Self.Teleport(sim, new Vector3(x, y, z))) {
                 } else {
                     string mes = "Teleport failed: " + this.mclient.Self.TeleportMessage;
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                 }
             }
         }

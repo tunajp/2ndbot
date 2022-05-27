@@ -12,8 +12,7 @@ namespace SecondBot.Client {
         {
             if (!File.Exists(Constants.NOTECARD_TEXT_FILENAME)) {
                     string mes = "Notecardのファイルが見つかりません。";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
             }
             string fileData;
@@ -21,8 +20,7 @@ namespace SecondBot.Client {
                 fileData = File.ReadAllText(Constants.NOTECARD_TEXT_FILENAME);
             } catch (Exception ex) {
                     string mes = "Notecardのファイル読み込みに失敗しました。" + ex.Message;
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
             }
             AssetNotecard notecard = new AssetNotecard
@@ -87,15 +85,13 @@ namespace SecondBot.Client {
 
             if (finalUploadSuccess) {
                 string mes = notecardItemID.ToString();
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
 
                 this.giveItem(notecardItemID, fromUUID, fromName);
                 this.deleteItem(notecardItemID);
             } else {
                 string mes = notecard_message;
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
         }

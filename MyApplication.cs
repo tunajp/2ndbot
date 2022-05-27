@@ -274,16 +274,33 @@ namespace SecondBot.Client {
             bool idleTalkExecute = false;
             if (message.Contains("コマンド") || message.Contains("ヘルプ") || message.Contains("一覧")) {
                 string commandList = Constants.COMMANDS;
-                if (type == 0) this.mclient.Self.Chat(commandList, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, commandList);
+                this.mclient.Say(fromUUID, commandList, 0, type, false);
             } else if(message.Contains("マニュアル")) {
                 createnotecardcommand.Execute(fromUUID, fromName, message, type);
-            } else if(message.Contains("座")) {
+            } else if (message.Contains("ギャル文字変換")) {
+                var arr1 = message.Split(' ');
+                if (arr1.Length == 1) {
+                    string mes = "引数を指定してください";
+                    this.mclient.Say(fromUUID, mes, 0, type);
+                    return;
+                }
+                this.mclient.Say(fromUUID, this.mclient.GetGalMoji(arr1[arr1.Length-1]), 0, type);
+            } else if (message.Contains("ギャル文字")) {
+                string mes = "";
+                string arg = message.ToLower();
+                if (arg.Contains("on")) {
+                    this.mclient.galMojiMode = true;
+                    mes = "ギャル文字をONにしました。OFFにするとき「立川君ギャル文字 OFF」と命令してください。";
+                } else if (arg.Contains("off")) {
+                    this.mclient.galMojiMode = false;
+                    mes = "ギャル文字をOFFにしました。ONにするとき「立川君ギャル文字 ON」と命令してください。";
+                }
+                this.mclient.Say(fromUUID, mes, 0, type);
+            } else if (message.Contains("座")) {
                 var arr1 = message.Split(' ');
                 if (arr1.Length == 1) {
                     string mes = "UUIDを指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 standupcommand.setCurrentAnims(this.currentAnims);
@@ -295,12 +312,11 @@ namespace SecondBot.Client {
                 UUID target = new UUID(target_uuid_string);
                 this.mclient.Self.RequestSit(target, Vector3.Zero);
                 this.mclient.Self.Sit();
-            } else if(message.Contains("タッチ")) {
+            } else if (message.Contains("タッチ")) {
                 var arr1 = message.Split(' ');
                 if (arr1.Length == 1) {
                     string mes = "UUIDを指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
 
@@ -315,15 +331,13 @@ namespace SecondBot.Client {
                         this.mclient.Self.Touch(targetPrim.LocalID);
                     } else {
                         string mes = "オブジェクトが見つかりませんでした";
-                        if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                        this.mclient.Say(fromUUID, mes, 0, type);
                     }
                 }
             } else if (message.Contains("休")) {
                 if (String.IsNullOrEmpty(this.bed)) {
                     string mes = "ベッドがありません・・・";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 string target_uuid_string = this.bed;
@@ -356,8 +370,7 @@ namespace SecondBot.Client {
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
                     string mes = "宛先をsim名/x/y/zで指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
 
@@ -372,8 +385,7 @@ namespace SecondBot.Client {
             } else if (message.Contains("終了")) {
                 if (fromName != this.owner) {
                     string mes = "Exit order revoked.";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 this.mclient.Network.Logout();
@@ -387,8 +399,7 @@ namespace SecondBot.Client {
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
                     string mes = "グループ名を指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 string groupName = message.Substring(index2+1, message.Length - index2-1);
@@ -415,12 +426,10 @@ namespace SecondBot.Client {
                 string mes = "お家へ帰りまーす！";
                 if (String.IsNullOrEmpty(this.home)) {
                     mes = "お家がありません・・・";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
 
                 standupcommand.setCurrentAnims(this.currentAnims);
                 standupcommand.Execute(fromUUID, fromName, message, type);
@@ -433,8 +442,7 @@ namespace SecondBot.Client {
             //} else if (message.Contains("sethome")) {
             //    this.mclient.Self.SetHome();
             //    string mes = "ここをホームに設定しました";
-            //    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-            //    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+            //    this.mclient.Say(fromUUID, mes, 0, type);
             } else if (message.Contains("チャットモード")) {
                 string mes = "";
                 if (message.Contains("指名")) {
@@ -444,8 +452,7 @@ namespace SecondBot.Client {
                     this.chatMode = ChatMode.All;
                     mes = "チャットモードを全レスモードに変更しました。うるさい場合は指名モードにしてください。";
                 }
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
             } else if (message.Contains("チャットAPI")) {
                 string mes = "";
                 if (message.Contains("chatplus")) {
@@ -455,37 +462,32 @@ namespace SecondBot.Client {
                     this.chatApi = ChatApi.mebo;
                     mes = "チャットAPIをmeboに変更しました。会話のラリーをお楽しみください。";
                 }
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
             } else if (message.Contains("どこ")) {
                 string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();
                 Vector3 globalPos = this.getCurrentGlobalPosition();
                 mes += "\n" + "グローバル座標:" + globalPos.X + "," + globalPos.Y + "." + globalPos.Z;
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
             } else if(message.Contains("チャンネルチャット")) {
                 string mes = "";
                 int index = message.IndexOf("チャンネルチャット");
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
                     mes = "チャンネル番号を指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 int index3 = message.IndexOf(" ", index2+1);
                 if (index3 == -1) {
                     mes = "押したいボタンを指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
 
                 string channel = message.Substring(index2+1, index3 - index2-1); // わからん！スペースで一回配列にしたほうがいいのか？
                 string button = message.Substring(index3+1,message.Length - index3-1);
                 mes = "チャンネル:" + Int32.Parse(channel).ToString() + ",押したいボタン:" + button;
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
 
                 // FIX ME: マイナスチャンネルでの発言が通らない
                 this.mclient.Self.Chat(button, Int32.Parse(channel), ChatType.Normal);
@@ -509,8 +511,7 @@ namespace SecondBot.Client {
                     mes = "オブジェクトIDを指定してください";
                 }
                 if (mes.Length > 0) {
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 string channel = arr[0];
@@ -518,8 +519,7 @@ namespace SecondBot.Client {
                 string btnLabel = arr[2];
                 string objectId = arr[3];
                 //mes = channel + "," + btnIndex + "," + btnLabel + "," + objectId;
-                //if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                //else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                //this.mclient.Say(fromUUID, mes, 0, type);
 
                 this.mclient.Self.ReplyToScriptDialog(Int32.Parse(channel), Int32.Parse(btnIndex), btnLabel, UUID.Parse(objectId));
             } else if (message.Contains("前へ")) {
@@ -546,8 +546,7 @@ namespace SecondBot.Client {
                     this.randomChat = false;
                     mes = "ランダム発言をOFFにしました。寂しいときな「立川君ランダム発言 ON」と命令してください。";
                 }
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
             } else if (message.Contains("アニメリスト")) {
                 animationcommand.list(fromUUID, fromName, message, type);
             } else if (message.Contains("アニメ")) {
@@ -555,8 +554,7 @@ namespace SecondBot.Client {
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
                     string mes = "アニメーション名を指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 string animName = message.Substring(index2+1, message.Length - index2-1);
@@ -567,7 +565,7 @@ namespace SecondBot.Client {
                 string danceanim = "DANCE" + next.ToString();
                 animationcommand.play(danceanim);
             } else if (message.Contains("Second Life") || message.Contains("SecondLife") || message.Contains("セカンドライフ")) {
-                this.mclient.Self.Chat(await SecondLifeFeedCommand.feed(), 0, ChatType.Normal);
+                this.mclient.Say(fromUUID, await SecondLifeFeedCommand.feed(), 0, type);
             } else if (message.Contains("アイテムリスト")) {
                 UUID folderUUID = UUID.Zero;
                 List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
@@ -601,22 +599,19 @@ namespace SecondBot.Client {
                 {
                     mes += item.Name + ",\n";
                 }
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
 
             } else if (message.Contains("attach")) {
                 if (fromName != this.owner) {
                     string mes = "attach order revoked." + fromName + "," + this.owner;
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 int index = message.IndexOf("attach");
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
                     string mes = "アイテム名称を指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 string itemName = message.Substring(index2+1, message.Length - index2-1);
@@ -674,8 +669,7 @@ namespace SecondBot.Client {
                 int index2 = message.IndexOf(" ", index);
                 if (index2 == -1) {
                     string mes = "アイテム名称を指定してください";
-                    if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                    else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                    this.mclient.Say(fromUUID, mes, 0, type);
                     return;
                 }
                 string itemName = message.Substring(index2+1, message.Length - index2-1);

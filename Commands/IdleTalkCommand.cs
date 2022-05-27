@@ -88,8 +88,7 @@ namespace SecondBot.Client {
             }
             if (!this.IsJapanese(message) && message.Distinct().Count() != 1) { // wwは英語と判定させない
                 string mes = @"Hello, my name is Tachikawa-kun, and I'm a BOT. I am currently unable to understand English. But I am sure that my dream of speaking in English will come true in the near future. I would appreciate it if you could wait for me until then.";
-                if (type == 0) this.mclient.Self.Chat(mes, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, mes);
+                this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
 
@@ -135,18 +134,15 @@ namespace SecondBot.Client {
                         var _response = await response.Content.ReadAsStringAsync();
 
                         ChatplusResponse? chatplusResponse = System.Text.Json.JsonSerializer.Deserialize<ChatplusResponse>(_response);
-                        if (type == 0) this.mclient.Self.Chat(chatplusResponse?.bestResponse?.utterance, 0, ChatType.Normal);
-                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, chatplusResponse?.bestResponse?.utterance);
+                        this.mclient.Say(fromUUID, chatplusResponse?.bestResponse?.utterance, 0, type);
                     } else {
                         Console.WriteLine("error");
-                        if (type == 0) this.mclient.Self.Chat("error", 0, ChatType.Normal);
-                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, "error");
+                        this.mclient.Say(fromUUID, "error", 0, type);
                     }
                 }
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
-                if (type == 0) this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, e.Message);
+                this.mclient.Say(fromUUID, e.Message, 0, type);
             } finally {
                 this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
                 this.mclient.Self.AnimationStop(Animations.TYPE, false);
@@ -159,13 +155,11 @@ namespace SecondBot.Client {
 
             // https://mebo.work/
             if (this.mebo_apikey == null || this.mebo_apikey.Length == 0) {
-                if (type == 0) this.mclient.Self.Chat("mebo_apikey null", 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, "mebo_apikey null");
+                this.mclient.Say(fromUUID, "mebo_apikey null", 0, type);
                 return;
             }
             if (this.mebo_agent_id == null || this.mebo_agent_id.Length == 0) {
-                if (type == 0) this.mclient.Self.Chat("mebo_agent_id null", 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, "mebo_agent_id null");
+                this.mclient.Say(fromUUID, "mebo_agent_id null", 0, type);
                 return;
             }
 
@@ -187,18 +181,15 @@ namespace SecondBot.Client {
                         var _response = await response.Content.ReadAsStringAsync();
 
                         MeboResponse? meboResponse = System.Text.Json.JsonSerializer.Deserialize<MeboResponse>(_response);
-                        if (type == 0) this.mclient.Self.Chat(meboResponse?.bestResponse?.utterance, 0, ChatType.Normal);
-                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, meboResponse?.bestResponse?.utterance);
+                        this.mclient.Say(fromUUID, meboResponse?.bestResponse?.utterance, 0, type);
                     } else {
                         Console.WriteLine("error");
-                        if (type == 0) this.mclient.Self.Chat("error", 0, ChatType.Normal);
-                        else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, "error");
+                        this.mclient.Say(fromUUID, "error", 0, type);
                     }
                 }
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
-                if (type == 0) this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
-                else if (type == 1) this.mclient.Self.InstantMessage(fromUUID, e.Message);
+                this.mclient.Say(fromUUID, e.Message, 0, type);
             } finally {
                 this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
                 this.mclient.Self.AnimationStop(Animations.TYPE, false);
@@ -229,13 +220,13 @@ namespace SecondBot.Client {
                             IEnumerable<XElement>? items = channel?.Elements("item");
                             var mes = items?.ElementAt(nextAction)?.Element("title")?.Value;
                             mes += " " + items?.ElementAt(nextAction)?.Element("link")?.Value;
-                            this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                            this.mclient.Say(UUID.Zero, mes, 0, 0);
                         } else {
-                            this.mclient.Self.Chat("error", 0, ChatType.Normal);
+                            this.mclient.Say(UUID.Zero, "error", 0, 0);
                         }
                     }
                 } catch (Exception e) {
-                    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
+                    this.mclient.Say(UUID.Zero, e.Message, 0, 0);
                 }
             } else {
                 // はてぶ
@@ -252,13 +243,13 @@ namespace SecondBot.Client {
                             IEnumerable<XElement>? items = xml?.Descendants(d + "item");
                             var mes = items?.ElementAt(nextAction-10)?.Element(d + "title")?.Value;
                             mes += " " + items?.ElementAt(nextAction-10)?.Element(d + "link")?.Value;
-                            this.mclient.Self.Chat(mes, 0, ChatType.Normal);
+                            this.mclient.Say(UUID.Zero, mes, 0, 0);
                         } else {
-                            this.mclient.Self.Chat("error", 0, ChatType.Normal);
+                            this.mclient.Say(UUID.Zero, "error", 0, 0);
                         }
                     }
                 } catch (Exception e) {
-                    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
+                    this.mclient.Say(UUID.Zero, e.Message, 0, 0);
                 }
             }
 

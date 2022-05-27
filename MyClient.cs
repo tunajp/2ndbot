@@ -6,8 +6,20 @@ namespace SecondBot.Client {
         public Dictionary<UUID, Group>? GroupsCache = null;
         private readonly ManualResetEvent GroupsEvent = new ManualResetEvent(false);
 
+        private GalMoji.Encoder enc;
+        public bool galMojiMode;
         public MyClient() {
+            this.enc = new GalMoji.Encoder();
+            this.galMojiMode = false;
+        }
 
+        public void Say(UUID fromUUID, string message, int channel, int type, bool filter = true) {
+            if (filter && this.galMojiMode) message = this.GetGalMoji(message);
+            if (type == 0) Self.Chat(message, 0, ChatType.Normal);
+            else if (type == 1) Self.InstantMessage(fromUUID, message);
+        }
+        public string GetGalMoji(string message) {
+            return this.enc.Encode(message, true);
         }
 
         public void ReloadGroupsCache() {
