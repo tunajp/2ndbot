@@ -218,9 +218,9 @@ namespace SecondBot.Client {
                             if (xml == null) return;
                             XElement? channel = xml.Element("channel");
                             IEnumerable<XElement>? items = channel?.Elements("item");
-                            var mes = items?.ElementAt(nextAction)?.Element("title")?.Value;
+                            var mes = this.mclient.GetGalMoji(items?.ElementAt(nextAction)?.Element("title")?.Value);
                             mes += " " + items?.ElementAt(nextAction)?.Element("link")?.Value;
-                            this.mclient.Say(UUID.Zero, mes, 0, 0);
+                            this.mclient.Say(UUID.Zero, mes, 0, 0, false);
                         } else {
                             this.mclient.Say(UUID.Zero, "error", 0, 0);
                         }
@@ -241,9 +241,9 @@ namespace SecondBot.Client {
                             var document = XDocument.Parse(_response);
                             XElement? xml = document.Root;
                             IEnumerable<XElement>? items = xml?.Descendants(d + "item");
-                            var mes = items?.ElementAt(nextAction-10)?.Element(d + "title")?.Value;
+                            var mes = this.mclient.GetGalMoji(items?.ElementAt(nextAction-10)?.Element(d + "title")?.Value);
                             mes += " " + items?.ElementAt(nextAction-10)?.Element(d + "link")?.Value;
-                            this.mclient.Say(UUID.Zero, mes, 0, 0);
+                            this.mclient.Say(UUID.Zero, mes, 0, 0, false);
                         } else {
                             this.mclient.Say(UUID.Zero, "error", 0, 0);
                         }
