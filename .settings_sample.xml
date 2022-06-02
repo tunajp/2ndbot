@@ -13,6 +13,7 @@
         <chatplus_agentname>立川君</chatplus_agentname>
         <mebo_apikey></mebo_apikey>
         <mebo_agent_id></mebo_agent_id>
+        <openai_apikey></openai_apikey>
         <script>scripts/default.py</script>
         <owner>ownerfirstname Resident</owner>
     </bot>
@@ -28,6 +29,7 @@
         <chatplus_agentname>立川君</chatplus_agentname>
         <mebo_apikey></mebo_apikey>
         <mebo_agent_id></mebo_agent_id>
+        <openai_apikey></openai_apikey>
         <script>scripts/default.py</script>
         <owner>ownerfirstname Resident</owner>
     </bot>

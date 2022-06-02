@@ -45,6 +45,8 @@
     使用するチャットAPIをchatplusにします。
 立川君チャットAPI mebo
     使用するチャットAPIをmeboにします。
+立川君チャットAPI openai
+    使用するチャットAPIをopenaiにします。
 立川君どこ
     現在地を返します。
 立川君タッチ uuid

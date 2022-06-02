@@ -56,18 +56,21 @@ namespace SecondBot.Client {
         private string? mebo_apikey;
         private string? mebo_agent_id;
 
+        private string? openai_apikey;
+
         public IdleTalkCommand(MyClient mclient) {
             this.mclient = mclient;
             this.chatApi = ChatApi.chatplus;
             this.chatplus_apikey = "";
             this.chatplus_agentname = "";
         }
-        public void setKeys(ChatApi chatApi, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id) {
+        public void setKeys(ChatApi chatApi, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey) {
             this.chatApi = chatApi;
             this.chatplus_apikey = chatplus_apikey;
             this.chatplus_agentname = chatplus_agentname;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
+            this.openai_apikey = openai_apikey;
         }
 
         public bool IsJapanese(string text) {
@@ -86,10 +89,12 @@ namespace SecondBot.Client {
             if (message.Contains("User not online")) {
                 return;
             }
-            if (!this.IsJapanese(message) && message.Distinct().Count() != 1) { // wwは英語と判定させない
-                string mes = @"Hello, my name is Tachikawa-kun, and I'm a BOT. I am currently unable to understand English. But I am sure that my dream of speaking in English will come true in the near future. I would appreciate it if you could wait for me until then.";
-                this.mclient.Say(fromUUID, mes, 0, type);
-                return;
+            if (this.chatApi != ChatApi.openai) {
+                if (!this.IsJapanese(message) && message.Distinct().Count() != 1) { // wwは英語と判定させない
+                    string mes = @"Hello, my name is Tachikawa-kun, and I'm a BOT. I am currently unable to understand English. But I am sure that my dream of speaking in English will come true in the near future. I would appreciate it if you could wait for me until then.";
+                    this.mclient.Say(fromUUID, mes, 0, type);
+                    return;
+                }
             }
 
             Vector3? targetPos = MyApplication.getTargetPos(this.mclient, fromName);
@@ -104,6 +109,7 @@ namespace SecondBot.Client {
 
             if (this.chatApi == ChatApi.chatplus) this.chatplus(fromUUID, fromName, message, type);
             if (this.chatApi == ChatApi.mebo) this.mebo(fromUUID, fromName, message, type);
+            if (this.chatApi == ChatApi.openai) this.openai(fromUUID, fromName, message, type);
             MyApplication.lastChatDateTime = DateTime.Now;
         }
 
@@ -195,6 +201,53 @@ namespace SecondBot.Client {
                 this.mclient.Self.AnimationStop(Animations.TYPE, false);
             }
 
+        }
+        async void openai(UUID fromUUID, string fromName, string message ,int type) {
+            this.mclient.Self.Chat(string.Empty, 0, ChatType.StartTyping);
+            this.mclient.Self.AnimationStart(Animations.TYPE, false);
+
+            if (this.openai_apikey == null || this.openai_apikey.Length == 0) {
+                this.mclient.Say(fromUUID, "openai_apikey null", 0, type);
+                return;
+            }
+
+            try {
+                var openAiService = new OpenAI.GPT3.Managers.OpenAIService(new OpenAI.GPT3.OpenAiOptions(){
+                    ApiKey = this.openai_apikey
+                });
+
+                string prompt = @"
+私:Hi
+AI:Hello!
+私:こんにちは、調子はどう？
+AI:元気です
+";
+                prompt += message + "\n";
+                prompt += "AI:";
+                Console.WriteLine(prompt);
+
+                var completionResult = await openAiService.Completions.Create(new OpenAI.GPT3.Models.RequestModels.CompletionCreateRequest() {
+                    Prompt = prompt,
+                    MaxTokens = 120,
+                    Echo = false,
+                    Temperature = 0.5f,
+                    Stop = "\n",
+                }, OpenAI.GPT3.Models.Engines.Engine.Curie);
+                if (completionResult.Successful) {
+                    Console.WriteLine();
+                    this.mclient.Say(fromUUID, completionResult.Choices.FirstOrDefault().Text, 0, type);
+                } else {
+                    if (completionResult.Error == null) {
+                        throw new Exception("Unknown Error" + $"{completionResult.Error.Code}: {completionResult.Error.Message}");
+                    }
+                }
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                this.mclient.Say(fromUUID, e.Message, 0, type);
+            } finally {
+                this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+                this.mclient.Self.AnimationStop(Animations.TYPE, false);
+            }
         }
 
         public async void rondomMessage() {
