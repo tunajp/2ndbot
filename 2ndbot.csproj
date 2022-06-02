@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.0.0" />
     <PackageReference Include="GalMoji" Version="0.0.1" />
     <PackageReference Include="IronPython" Version="3.4.0-beta1" />
     <PackageReference Include="LibreMetaverse" Version="1.9.20.450" />

@@ -11,6 +11,7 @@ namespace SecondBot.Client {
     public enum ChatApi {
         chatplus = 0,
         mebo,
+        openai,
     }
     public class MyApplication {
         MyClient mclient;
@@ -37,11 +38,12 @@ namespace SecondBot.Client {
         string chatplus_agentname;
         string? mebo_apikey;
         string? mebo_agent_id;
+        string? openai_apikey;
         string? script;
         string owner;
 
         ChatMode chatMode; // 0:指名モード 1:全レス
-        ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month)
+        ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month) 2:openai
         private ManualResetEvent GroupsEvent = new ManualResetEvent(false);
 
         private ManualResetEvent ItemEvent = new ManualResetEvent(false);
@@ -62,7 +64,7 @@ namespace SecondBot.Client {
         private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
         private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
 
-        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? script, string owner) {
+        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? script, string owner) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
@@ -84,6 +86,7 @@ namespace SecondBot.Client {
             this.chatplus_agentname = chatplus_agentname;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
+            this.openai_apikey = openai_apikey;
             this.script = script;
             this.owner = owner;
 
@@ -230,7 +233,7 @@ namespace SecondBot.Client {
                 } else {
                     if (this.chatMode == ChatMode.All) {
                         Console.WriteLine(this.mclient.Self.AgentID + " " + e.SourceID);
-                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
+                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
                         idletalkcommand.Execute(e.SourceID, e.FromName, message, 0);
                     }
                 }
@@ -461,6 +464,9 @@ namespace SecondBot.Client {
                 } else if (message.Contains("mebo")) {
                     this.chatApi = ChatApi.mebo;
                     mes = "チャットAPIをmeboに変更しました。会話のラリーをお楽しみください。";
+                } else if (message.Contains("openai")) {
+                    this.chatApi = ChatApi.openai;
+                    mes = "チャットAPIをOpenAIに変更しました。イーロン・マスクをお楽しみください。";
                 }
                 this.mclient.Say(fromUUID, mes, 0, type);
             } else if (message.Contains("どこ")) {
@@ -786,7 +792,7 @@ namespace SecondBot.Client {
                 }
             }
             if(idleTalkExecute) {
-                idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
+                idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
                 idletalkcommand.Execute(fromUUID, fromName, message, type);
             }
 
@@ -843,7 +849,7 @@ namespace SecondBot.Client {
                             Console.WriteLine(ex.Message);
                         }
                     } else if (nextAction == 1) {
-                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id);
+                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
                         idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
                     } else {
                         idletalkcommand.rondomMessage();
