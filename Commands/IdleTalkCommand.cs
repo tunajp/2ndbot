@@ -57,6 +57,7 @@ namespace SecondBot.Client {
         private string? mebo_agent_id;
 
         private string? openai_apikey;
+        private Dictionary<UUID, Queue<List<string>>> openai_dic = new Dictionary<UUID, Queue<List<string>>>();
 
         public IdleTalkCommand(MyClient mclient) {
             this.mclient = mclient;
@@ -222,7 +223,21 @@ AI:Hello!
 私:こんにちは、調子はどう？
 AI:元気です
 ";
-                prompt += message + "\n";
+                foreach (var item in this.openai_dic) {
+                    if (item.Key == fromUUID) {
+                        foreach(var item2 in item.Value) {
+                            if (prompt.Contains(item2[1])) { // 同じ回答があった場合は、その回答に集約されてしまうため飛ばす
+                                Console.WriteLine("skipped:"+item2[0]);
+                                Console.WriteLine("skipped:"+item2[1]);
+                                continue;
+                            }
+                            prompt += "私:"+item2[0] + "\n";
+                            prompt += "AI:"+item2[1] + "\n";
+                        }
+                    }
+                }
+
+                prompt += "私:" + message + "\n";
                 prompt += "AI:";
                 Console.WriteLine(prompt);
 
@@ -230,16 +245,41 @@ AI:元気です
                     Prompt = prompt,
                     MaxTokens = 120,
                     Echo = false,
-                    Temperature = 0.5f,
+                    Temperature = 0.7f,
                     Stop = "\n",
                 }, OpenAI.GPT3.Models.Engines.Engine.Curie);
                 if (completionResult.Successful) {
                     Console.WriteLine();
-                    this.mclient.Say(fromUUID, completionResult.Choices.FirstOrDefault().Text, 0, type);
+                    string answer = completionResult.Choices.FirstOrDefault().Text;
+                    this.mclient.Say(fromUUID, answer, 0, type);
+
+                    if (openai_dic.ContainsKey(fromUUID)) {
+                        Queue<List<string>> q = openai_dic[fromUUID];
+                        List<string> mes2 = new List<string>();
+                        mes2.Add(message);
+                        mes2.Add(answer);
+                        while (q.Count > 5)
+                        {
+                            List<string>? outObj;
+                            q.TryDequeue(out outObj); // 先頭を取り出す
+                        }
+                        q.Enqueue(mes2);
+                    } else {
+                        // Add
+                        Queue<List<string>> q2 = new Queue<List<string>>();
+                        List<string> mes3 = new List<string>();
+                        mes3.Add(message);
+                        mes3.Add(answer);
+                        q2.Enqueue(mes3);
+
+                        openai_dic.Add(fromUUID, q2);
+                    }
+
                 } else {
                     if (completionResult.Error == null) {
-                        throw new Exception("Unknown Error" + $"{completionResult.Error.Code}: {completionResult.Error.Message}");
+                        throw new Exception("Unknown Error");
                     }
+                    throw new Exception($"{completionResult.Error.Code}: {completionResult.Error.Message}");
                 }
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
