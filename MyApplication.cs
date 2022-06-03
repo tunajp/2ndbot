@@ -837,7 +837,11 @@ namespace SecondBot.Client {
                 if (d.TotalSeconds > Constants.RANDOM_CHAT_TIMER) {
                     Console.WriteLine("ランダムな発言");
                     Random r = new System.Random();
-                    int nextAction = r.Next(0, 3); // 0-2
+                    int max = 3; // 0-2
+                    if (this.chatApi == ChatApi.openai) {
+                        max = 2; // 0-1
+                    }
+                    int nextAction = r.Next(0, max);
                     if (nextAction == 0) {
                         int ramdomGestureNum = r.Next(0, 10); // 0-9
                         try {
@@ -849,10 +853,10 @@ namespace SecondBot.Client {
                             Console.WriteLine(ex.Message);
                         }
                     } else if (nextAction == 1) {
+                        idletalkcommand.rondomMessage();
+                    } else {
                         idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
                         idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
-                    } else {
-                        idletalkcommand.rondomMessage();
                     }
                 }
             }
