@@ -1096,6 +1096,7 @@ namespace SecondBot.Client {
         void Inventory_InventoryObjectOfferd(object? sender, InventoryObjectOfferedEventArgs e) {
             Console.WriteLine("Accepting InventoryOffer" + e.Offer.FromAgentName + " " + e.Offer.Message);
             e.Accept = true;
+            this.mclient.Self.PlayGesture(new UUID("68ca4eb0-4b4d-4dce-39fb-df6f5e08fee9"));
         }
 
         void Inventory_OnFolderUpdated(object? sender, FolderUpdatedEventArgs e) {

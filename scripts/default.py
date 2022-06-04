@@ -38,6 +38,7 @@ def Network_OnLogin():
 # 手遅れだと思います 7e2848ed-607e-ee8d-b886-dfb955aa878a
 # 寝たら死ぬぞ 7ce31c3b-437a-cd46-e360-738df8c8e211
 # また髪の話してる f28fd398-26ce-5bdc-976d-7e53bd9c478d
+# ありまたお 68ca4eb0-4b4d-4dce-39fb-df6f5e08fee9
 def chatBeforHook(fromUUID, fromName, message, type):
     if "うさうさ❤" in message:
         Thread.Sleep(1000)
