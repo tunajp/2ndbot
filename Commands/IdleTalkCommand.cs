@@ -57,6 +57,7 @@ namespace SecondBot.Client {
         private string? mebo_agent_id;
 
         private string? openai_apikey;
+        private string openai_prompt;
         private Dictionary<UUID, Queue<List<string>>> openai_dic = new Dictionary<UUID, Queue<List<string>>>();
 
         public IdleTalkCommand(MyClient mclient) {
@@ -65,13 +66,14 @@ namespace SecondBot.Client {
             this.chatplus_apikey = "";
             this.chatplus_agentname = "";
         }
-        public void setKeys(ChatApi chatApi, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey) {
+        public void setKeys(ChatApi chatApi, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string openai_prompt) {
             this.chatApi = chatApi;
             this.chatplus_apikey = chatplus_apikey;
             this.chatplus_agentname = chatplus_agentname;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
             this.openai_apikey = openai_apikey;
+            this.openai_prompt = openai_prompt;
         }
 
         public bool IsJapanese(string text) {
@@ -217,12 +219,7 @@ namespace SecondBot.Client {
                     ApiKey = this.openai_apikey
                 });
 
-                string prompt = @"
-私:Hi
-AI:Hello!
-私:こんにちは、調子はどう？
-AI:元気です
-";
+                string prompt = this.openai_prompt;
                 foreach (var item in this.openai_dic) {
                     if (item.Key == fromUUID) {
                         foreach(var item2 in item.Value) {

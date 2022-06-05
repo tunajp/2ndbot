@@ -82,6 +82,28 @@ def command(fromUUID, fromName, message, type):
     else:
         return True
 
+def openaiPrompt(fromUUID, fromName, message, type):
+    prompt = "私:Hi\n"
+    prompt += "AI:Hello!\n"
+    prompt += "私:こんにちは、調子はどう？\n"
+    prompt += "AI:元気です\n"
+    prompt += "私:好きだよ\n"
+    prompt += "AI:私も" + fromName + "さんのことが好きです\n"
+
+    # Experimental キャバ嬢promptを追加
+    prompt += "私:最近車買ったんです\n"
+    prompt += "AI:さすがですね！\n"
+    prompt += "私:新しくできたSimのお店知ってる？\n"
+    prompt += "AI:知らないですー。！もしかしてもう行ったんですか？どうでした？\n"
+    prompt += "私:最近前向きに考えるようにしてるんだ\n"
+    prompt += "AI:そんなふうに考えられるなんて、" + fromName + "さんすごいですね。\n"
+    prompt += "私:新しい服に着替えてみたんだけどどうかな\n"
+    prompt += "AI:その服、" + fromName + "さんに似合ってます。センスいいですね。\n"
+    prompt += "私:気になるニュースがあるんだ\n"
+    prompt += "AI:そうなんですね！\n"
+
+    return prompt
+
 # 1sec Elapsed
 def updateTimer_Elapsed():
     pass
@@ -100,6 +122,7 @@ def randomGesture(num):
     else:
         # もさもさ
         mclient.Self.PlayGesture(UUID("35d735ea-8902-2b4c-46b6-70e27954af7e"))
+
 
 if __name__ == '__main__':
     print("main")
