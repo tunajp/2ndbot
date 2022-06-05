@@ -233,8 +233,16 @@ namespace SecondBot.Client {
                 } else {
                     if (this.chatMode == ChatMode.All) {
                         Console.WriteLine(this.mclient.Self.AgentID + " " + e.SourceID);
-                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
-                        idletalkcommand.Execute(e.SourceID, e.FromName, message, 0);
+                        try {
+                            this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                            dynamic openaiPrompt = this.scriptScope.GetVariable(@"openaiPrompt");
+                            string prompt = openaiPrompt(e.SourceID, e.FromName, message, 0);
+
+                            idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
+                            idletalkcommand.Execute(e.SourceID, e.FromName, message, 0);
+                        } catch(Exception ex) {
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                 }
             }
@@ -792,8 +800,16 @@ namespace SecondBot.Client {
                 }
             }
             if(idleTalkExecute) {
-                idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
-                idletalkcommand.Execute(fromUUID, fromName, message, type);
+                try {
+                    this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
+                    dynamic openaiPrompt = this.scriptScope.GetVariable(@"openaiPrompt");
+                    string prompt = openaiPrompt(fromUUID, fromName, message, type);
+
+                    idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
+                    idletalkcommand.Execute(fromUUID, fromName, message, type);
+                } catch(Exception e) {
+                    Console.WriteLine(e.Message);
+                }
             }
 
         }
@@ -855,7 +871,7 @@ namespace SecondBot.Client {
                     } else if (nextAction == 1) {
                         idletalkcommand.rondomMessage();
                     } else {
-                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey);
+                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, "");
                         idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
                     }
                 }
