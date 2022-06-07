@@ -215,6 +215,17 @@ namespace SecondBot.Client {
             }
 
             try {
+                if (message.Contains("関係を解消")) {
+                    if (openai_dic.ContainsKey(fromUUID)) {
+                        Queue<List<string>> q = openai_dic[fromUUID];
+                        while (q.Count > 0)
+                        {
+                            List<string>? outObj;
+                            q.TryDequeue(out outObj); // 先頭を取り出す
+                        }
+                    }
+                    throw new Exception("queueを空にしました");
+                }
                 var openAiService = new OpenAI.GPT3.Managers.OpenAIService(new OpenAI.GPT3.OpenAiOptions(){
                     ApiKey = this.openai_apikey
                 });
