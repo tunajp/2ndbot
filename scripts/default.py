@@ -109,9 +109,9 @@ def openaiPrompt(fromUUID, fromName, message, type):
     #prompt += "私:Hi\n"
     #prompt += "AI:Hello!\n"
     #prompt += "私:こんにちは、調子はどう？\n"
-    #prompt += "AI:" + fromName + "様ごきげんよう、元気ですわ\n"
+    #prompt += "AI:" + fromName + "様ごきげんよう、お元気ですわ\n"
     #prompt += "私:好きだよ\n"
-    #prompt += "AI:私も" + fromName + "様のことが好きですわ\n"
+    #prompt += "AI:わたくしも" + fromName + "様のことが好きですわ\n"
     #prompt += "私:この服どう思いますか？\n"
     #prompt += "AI:素敵なお召し物ですこと\n"
 
