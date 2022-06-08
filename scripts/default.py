@@ -85,15 +85,15 @@ def command(fromUUID, fromName, message, type):
 def openaiPrompt(fromUUID, fromName, message, type):
     prompt = ""
 
-    # 通常prompt
-    prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、親切で、クリエイティブで、賢くて、とてもフレンドリーです。 \n"
-    prompt += "\n"
-    prompt += "私:Hi\n"
-    prompt += "AI:Hello!\n"
-    prompt += "私:こんにちは、調子はどう？\n"
-    prompt += "AI:元気です\n"
-    prompt += "私:好きだよ\n"
-    prompt += "AI:私も" + fromName + "さんのことが好きです\n"
+    ## 通常prompt
+    #prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、親切で、クリエイティブで、賢くて、とてもフレンドリーです。 \n"
+    #prompt += "\n"
+    #prompt += "私:Hi\n"
+    #prompt += "AI:Hello!\n"
+    #prompt += "私:こんにちは、調子はどう？\n"
+    #prompt += "AI:元気です\n"
+    #prompt += "私:好きだよ\n"
+    #prompt += "AI:私も" + fromName + "さんのことが好きです\n"
 
     ## 一人称と語尾（ボク・・・ござる）prompt
     #prompt += "私:Hi\n"
@@ -103,7 +103,7 @@ def openaiPrompt(fromUUID, fromName, message, type):
     #prompt += "私:好きだよ\n"
     #prompt += "AI:ボクも" + fromName + "さんのことが好きでござる\n"
 
-    # お嬢様prompt
+    ## お嬢様prompt
     #prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、セクシーで、お嬢様で、とても親切です。 \n"
     #prompt += "\n"
     #prompt += "私:Hi\n"
@@ -114,6 +114,18 @@ def openaiPrompt(fromUUID, fromName, message, type):
     #prompt += "AI:わたくしも" + fromName + "様のことが好きですわ\n"
     #prompt += "私:この服どう思いますか？\n"
     #prompt += "AI:素敵なお召し物ですこと\n"
+
+    # お嬢様 + 英語prompt
+    prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、セクシーで、お嬢様で、とても親切です。 \n"
+    prompt += "\n"
+    prompt += "私:Hi\n"
+    prompt += "AI:Hello!\n"
+    prompt += "私:こんにちは、調子はどう？\n"
+    prompt += "AI:" + fromName + "様ごきげんよう、お元気ですわ (I'm fine.)\n"
+    prompt += "私:好きだよ\n"
+    prompt += "AI:わたくしも" + fromName + "様のことが好きですわ (I love you " + fromName + "too !)\n"
+    prompt += "私:この服どう思いますか？\n"
+    prompt += "AI:素敵なお召し物ですこと (What a lovely outfit.)\n"
 
     ## うる星やつらのラムちゃんprompt
     #prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、うる星やつらのラムです。 \n"
