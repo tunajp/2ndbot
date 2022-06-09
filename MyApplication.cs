@@ -31,7 +31,7 @@ namespace SecondBot.Client {
 
         string? activeGroup;
 
-        string nickname;
+        List<string> nicknames;
         string? home;
         string? bed;
         string chatplus_apikey;
@@ -64,7 +64,7 @@ namespace SecondBot.Client {
         private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
         private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
 
-        public MyApplication(string firstname, string lastname, string pass, string start, string nickname, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? script, string owner) {
+        public MyApplication(string firstname, string lastname, string pass, string start, List<string> nicknames, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? script, string owner) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
@@ -79,7 +79,7 @@ namespace SecondBot.Client {
             this.lastLoiterDateTime = DateTime.Now;
             MyApplication.lastChatDateTime = DateTime.Now;
 
-            this.nickname = nickname;
+            this.nicknames = nicknames;
             this.home = home;
             this.bed = bed;
             this.chatplus_apikey = chatplus_apikey;
@@ -204,7 +204,7 @@ namespace SecondBot.Client {
             //if (e.Message.Length > 0 && (this.mclient.MasterKey == e.SourceID || (this.mclient.MasterName == e.FromName && !this.mclient.AllowObjectMaster))) {
             //    this.mclient.Self.Chat(e.Message, 0, ChatType.Normal);
             //}
-            Console.WriteLine("発言者:" + e.SourceID + " ," + this.nickname + ":" + this.mclient.Self.AgentID);
+            Console.WriteLine("発言者:" + e.SourceID + " ," + this.nicknames[0] + ":" + this.mclient.Self.AgentID);
             if (e.Message.Length > 0 && e.SourceID != this.mclient.Self.AgentID) {
                 if (!idletalkcommand.IsJapanese(e.Message) && e.SourceType != ChatSourceType.Agent) {
                     Console.WriteLine("Ignore this as it is not a chat from agent.");
@@ -227,7 +227,14 @@ namespace SecondBot.Client {
                     return;
                 }
 
-                if (message.Trim().StartsWith(this.nickname)) {
+                bool found = false;
+                foreach (var nickname in this.nicknames) {
+                    if (message.Trim().ToLower().Contains(nickname)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
                     message = message.Replace("　", " ");
                     this.command(e.SourceID, e.FromName, message, 0);
                 } else {
@@ -458,7 +465,11 @@ namespace SecondBot.Client {
                 string mes = "";
                 if (message.Contains("指名")) {
                     this.chatMode = ChatMode.Nominate;
-                    mes = "チャットモードを指名モードに変更しました。" + this.nickname + "から始まる言葉のみ反応します。";
+                    mes = "チャットモードを指名モードに変更しました。";
+                    foreach (var nickname in this.nicknames) {
+                        mes += nickname + ",";
+                    }
+                    mes += "から始まる言葉のみ反応します。";
                 } else if (message.Contains("全レス")) {
                     this.chatMode = ChatMode.All;
                     mes = "チャットモードを全レスモードに変更しました。うるさい場合は指名モードにしてください。";

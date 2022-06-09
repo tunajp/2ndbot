@@ -19,7 +19,11 @@ namespace SecondBot.Client {
                     String? lastname = bot.Element("lastname")?.Value;
                     String? password = bot.Element("password")?.Value;
                     String? start = bot.Element("start")?.Value;
-                    String? nickname = bot.Element("nickname")?.Value;
+                    IEnumerable<XElement> nicknameElement = from item in bot.Elements("nickname") select item;
+                    List<string> nicknames = new List<string>();
+                    foreach(XElement nickname in nicknameElement) {
+                        nicknames.Add(nickname.Value.ToLower());
+                    }
                     String? home = bot.Element("home")?.Value;
                     String? bed = bot.Element("bed")?.Value;
                     String? chatplus_apikey = bot.Element("chatplus_apikey")?.Value;
@@ -32,7 +36,7 @@ namespace SecondBot.Client {
                     if (fistname == null || fistname.Length == 0
                         || lastname == null || lastname.Length == 0
                         || password == null || password.Length == 0
-                        || nickname == null || nickname.Length == 0
+                        || nicknames.Count == 0
                         || chatplus_apikey == null || chatplus_apikey.Length == 0
                         || chatplus_agentname == null || chatplus_agentname.Length == 0
                         || owner == null || owner.Length == 0
@@ -43,8 +47,8 @@ namespace SecondBot.Client {
                     }
                     if (start == null) start = "last";
 
-                    Console.WriteLine(fistname + " " + lastname + " " + nickname +" ...starting");
-                    new MyApplication(fistname, lastname, password, start, nickname, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, openai_apikey, script,owner);
+                    Console.WriteLine(fistname + " " + lastname + " " + nicknames[0] +" ...starting");
+                    new MyApplication(fistname, lastname, password, start, nicknames, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, openai_apikey, script,owner);
                     // アプリケーション数が0になったら終了する
                     myAppCount += 1;
                 }
