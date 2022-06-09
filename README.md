@@ -4,12 +4,13 @@ Second Life Bot System.
 
 using libremetaverse
 
-chat API
+Chat API
 
 https://www.chaplus.jp/
 
 https://mebo.work/
 
+https://openai.com/
 
 ```
 $ wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
