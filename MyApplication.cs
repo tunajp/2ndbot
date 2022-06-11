@@ -1,5 +1,8 @@
 using System.Runtime.Loader;
 
+using NMeCab.Specialized;
+using System.Linq;
+
 using OpenMetaverse;
 using OpenMetaverse.Packets;
 
@@ -41,6 +44,8 @@ namespace SecondBot.Client {
         string? openai_apikey;
         string? script;
         string owner;
+
+        MeCabIpaDicTagger tagger;
 
         ChatMode chatMode; // 0:指名モード 1:全レス
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month) 2:openai
@@ -89,6 +94,8 @@ namespace SecondBot.Client {
             this.openai_apikey = openai_apikey;
             this.script = script;
             this.owner = owner;
+
+            this.tagger = MeCabIpaDicTagger.Create();
 
             this.mclient = new MyClient();
             this.mclient.Settings.USE_LLSD_LOGIN = true; // LLSD or XML-RPC(古い形式)
@@ -177,6 +184,7 @@ namespace SecondBot.Client {
             else if (e.Status == LoginStatus.Failed) {
                 Console.WriteLine("Login Failed");
                 Program.myAppCount -= 1;
+                this.tagger.Dispose();
                 if (Program.myAppCount == 0) {
                     Console.WriteLine(mes);
                     Environment.Exit(0);
@@ -193,6 +201,7 @@ namespace SecondBot.Client {
         void Network_OnDisconnected(object? sender, DisconnectedEventArgs e) {
             Console.WriteLine("Disconnected");
             Program.myAppCount -= 1;
+            this.tagger.Dispose();
             Console.WriteLine("残り:" + Program.myAppCount);
             if (Program.myAppCount == 0) {
                 Environment.Exit(0);
@@ -206,7 +215,8 @@ namespace SecondBot.Client {
             //}
             Console.WriteLine("発言者:" + e.SourceID + " ," + this.nicknames[0] + ":" + this.mclient.Self.AgentID);
             if (e.Message.Length > 0 && e.SourceID != this.mclient.Self.AgentID) {
-                if (!idletalkcommand.IsJapanese(e.Message) && e.SourceType != ChatSourceType.Agent) {
+                bool isJapanese = idletalkcommand.IsJapanese(e.Message);
+                if (!isJapanese && e.SourceType != ChatSourceType.Agent) {
                     Console.WriteLine("Ignore this as it is not a chat from agent.");
                     return;
                 }
@@ -228,12 +238,28 @@ namespace SecondBot.Client {
                 }
 
                 bool found = false;
-                foreach (var nickname in this.nicknames) {
-                    if (message.Trim().ToLower().Contains(nickname)) {
+                if (isJapanese) {
+                    var nodes = tagger.Parse(message);
+                    var arr = nodes.Where(n => this.nicknames.Contains(n.Surface.ToLower()));
+                    if (arr.Count() > 0) {
+                        //Console.WriteLine("呼ばれた");
                         found = true;
-                        break;
+                    }
+
+                } else {
+                    string[] arr =  message.Split(' ');
+                    var arr1 = arr.Where(a => this.nicknames.Contains(a.ToLower()));
+                    if (arr1.Count() > 0) {
+                        //Console.WriteLine("呼ばれた");
+                        found = true;
                     }
                 }
+                //foreach (var nickname in this.nicknames) {
+                //    if (message.Trim().ToLower().Contains(nickname)) {
+                //        found = true;
+                //        break;
+                //    }
+                //}
                 if (found) {
                     message = message.Replace("　", " ");
                     this.command(e.SourceID, e.FromName, message, 0);
