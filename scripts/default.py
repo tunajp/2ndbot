@@ -119,7 +119,7 @@ def openaiPrompt(fromUUID, fromName, message, type):
     prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、セクシーで、お嬢様で、とても親切です。 \n"
     prompt += "\n"
     prompt += "私:Hi\n"
-    prompt += "AI:Hello!\n"
+    prompt += "AI:ごきげんよう (Hello!)\n"
     prompt += "私:こんにちは、調子はどう？\n"
     prompt += "AI:" + fromName + "様ごきげんよう、お元気ですわ (I'm fine.)\n"
     prompt += "私:好きだよ\n"

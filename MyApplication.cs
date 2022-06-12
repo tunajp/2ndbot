@@ -1,4 +1,5 @@
 using System.Runtime.Loader;
+using System.Reflection;
 
 using NMeCab.Specialized;
 using System.Linq;
@@ -46,6 +47,8 @@ namespace SecondBot.Client {
         string owner;
 
         MeCabIpaDicTagger tagger;
+
+        private Dictionary<string, List<string>> commandDic = new Dictionary<string, List<string>>();
 
         ChatMode chatMode; // 0:指名モード 1:全レス
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month) 2:openai
@@ -96,6 +99,44 @@ namespace SecondBot.Client {
             this.owner = owner;
 
             this.tagger = MeCabIpaDicTagger.Create();
+
+            commandDic.Add("helpCommand", new List<string>(){"コマンド", "ヘルプ", "一覧", "commands"});
+            commandDic.Add("manualCommand", new List<string>(){"マニュアル", "manual"});
+            commandDic.Add("galmojiConvCommand", new List<string>(){"ギャル文字変換", "galmojiconv"});
+            commandDic.Add("galmojiCommand", new List<string>(){"ギャル文字", "galmoji"});
+            commandDic.Add("sitCommand", new List<string>(){"座", "sit"});
+            commandDic.Add("touchCommand", new List<string>(){"タッチ", "touch"});
+            commandDic.Add("restCommand", new List<string>(){"休", "rest"});
+            commandDic.Add("standCommand", new List<string>(){"立ち", "立って", "stand"});
+            commandDic.Add("followCommand", new List<string>(){"おいで", "来", "follow me"});
+            commandDic.Add("stopCommand", new List<string>(){"止", "stop"});
+            commandDic.Add("teleportCommand", new List<string>(){"テレポ", "teleport"});
+            commandDic.Add("exitCommand", new List<string>(){"終了", "exit"});
+            commandDic.Add("groupCommand", new List<string>(){"グループ", "group"});
+            commandDic.Add("gotoHomeCommand", new List<string>(){"帰", "戻", "goto home", "retrun home"});
+            //commandDic.Add("setHomeCommand", new List<string>(){"set home"});
+            commandDic.Add("chatModeCommand", new List<string>(){"チャットモード", "chatmode", "chat mode"});
+            commandDic.Add("chatApiCommand", new List<string>(){"チャットAPI", "chatapi", "chat api"});
+            commandDic.Add("whereCommand", new List<string>(){"どこ", "where"});
+            commandDic.Add("channelChatCommand", new List<string>(){"チャンネルチャット", "channnel chat"});
+            commandDic.Add("buttonClickCommand", new List<string>(){"ボタンクリック", "button click"});
+            commandDic.Add("forwardCommand", new List<string>(){"前へ", "to forward"});
+            commandDic.Add("backCommand", new List<string>(){"後ろへ", "to back"});
+            commandDic.Add("rightCommand", new List<string>(){"右へ", "to right"});
+            commandDic.Add("leftCommand", new List<string>(){"左へ", "to left"});
+            commandDic.Add("loiterCommand", new List<string>(){"うろうろ", "loiter"});
+            commandDic.Add("randomCommand", new List<string>(){"ランダム発言", "random message"});
+            commandDic.Add("animListCommand", new List<string>(){"アニメリスト", "anim list"});
+            commandDic.Add("animCommand", new List<string>(){"アニメ", "anim"});
+            commandDic.Add("danceCommand", new List<string>(){"踊", "dance"});
+            commandDic.Add("secondLifeCommand", new List<string>(){"セカンドライフ", "Second Life", "SecondLife"});
+            commandDic.Add("itemListCommand", new List<string>(){"アイテムリスト", "item list"});
+            commandDic.Add("attachCommand", new List<string>(){"attach"});
+            commandDic.Add("detachCommand", new List<string>(){"detach"});
+            commandDic.Add("inventoryCommand", new List<string>(){"インベントリ表示", "inventory"});
+            commandDic.Add("appearanceCommand", new List<string>(){"appearance"});
+            commandDic.Add("shootCommand", new List<string>(){"shoot"});
+            commandDic.Add("debugCommand", new List<string>(){"デバッグ", "debug"});
 
             this.mclient = new MyClient();
             this.mclient.Settings.USE_LLSD_LOGIN = true; // LLSD or XML-RPC(古い形式)
@@ -314,520 +355,13 @@ namespace SecondBot.Client {
             }
         }
 
-        async void command(UUID fromUUID, string fromName, string message ,int type) {
+        void command(UUID fromUUID, string fromName, string message ,int type) {
             bool idleTalkExecute = false;
-            if (message.Contains("コマンド") || message.Contains("ヘルプ") || message.Contains("一覧")) {
-                string commandList = Constants.COMMANDS;
-                this.mclient.Say(fromUUID, commandList, 0, type, false);
-            } else if(message.Contains("マニュアル")) {
-                createnotecardcommand.Execute(fromUUID, fromName, message, type);
-            } else if (message.Contains("ギャル文字変換")) {
-                var arr1 = message.Split(' ');
-                if (arr1.Length == 1) {
-                    string mes = "引数を指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                this.mclient.Say(fromUUID, this.mclient.GetGalMoji(arr1[arr1.Length-1]), 0, type);
-            } else if (message.Contains("ギャル文字")) {
-                string mes = "";
-                string arg = message.ToLower();
-                if (arg.Contains("on")) {
-                    this.mclient.galMojiMode = true;
-                    mes = "ギャル文字をONにしました。OFFにするとき「立川君ギャル文字 OFF」と命令してください。";
-                } else if (arg.Contains("off")) {
-                    this.mclient.galMojiMode = false;
-                    mes = "ギャル文字をOFFにしました。ONにするとき「立川君ギャル文字 ON」と命令してください。";
-                }
-                this.mclient.Say(fromUUID, mes, 0, type);
-            } else if (message.Contains("座")) {
-                var arr1 = message.Split(' ');
-                if (arr1.Length == 1) {
-                    string mes = "UUIDを指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
+            bool commandFound = false;
 
-                string target_uuid_string = arr1[arr1.Length-1];
-                Console.WriteLine("target:" + target_uuid_string);
+            commandFound = commandSearch(fromUUID, fromName, message, type);
 
-                UUID target = new UUID(target_uuid_string);
-                this.mclient.Self.RequestSit(target, Vector3.Zero);
-                this.mclient.Self.Sit();
-            } else if (message.Contains("タッチ")) {
-                var arr1 = message.Split(' ');
-                if (arr1.Length == 1) {
-                    string mes = "UUIDを指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-
-                string target_uuid_string = arr1[arr1.Length-1];
-                UUID target;
-                if (UUID.TryParse(target_uuid_string, out target)) {
-                    Primitive targetPrim = this.mclient.Network.CurrentSim.ObjectsPrimitives.Find(
-                        prim => prim.ID == target
-                    );
-
-                    if (targetPrim != null) {
-                        this.mclient.Self.Touch(targetPrim.LocalID);
-                    } else {
-                        string mes = "オブジェクトが見つかりませんでした";
-                        this.mclient.Say(fromUUID, mes, 0, type);
-                    }
-                }
-            } else if (message.Contains("休")) {
-                if (String.IsNullOrEmpty(this.bed)) {
-                    string mes = "ベッドがありません・・・";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                string target_uuid_string = this.bed;
-                UUID target = new UUID(target_uuid_string);
-                this.mclient.Self.RequestSit(target, Vector3.Zero);
-                this.mclient.Self.Sit();
-            } else if (message.Contains("立ち") || message.Contains("立って")) {
-                standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
-
-            } else if (message.Contains("おいで") || message.Contains("来")) {
-                this.loiter = false;
-                this.mclient.Self.AutoPilotCancel();
-                standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
-
-                //followTarget = e.SourceID;
-                followTarget = fromName;
-                Console.WriteLine(followTarget.ToString());
-
-            } else if (message.Contains("止")) {
-                followTarget = null;
-                this.loiter = false;
-                standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
-                this.mclient.Self.AutoPilotCancel();
-            } else if (message.Contains("テレポ")) {
-                this.loiter = false;
-                int index = message.IndexOf("テレポ");
-                int index2 = message.IndexOf(" ", index);
-                if (index2 == -1) {
-                    string mes = "宛先をsim名/x/y/zで指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-
-                standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
-                string target = message.Substring(index2+1, message.Length - index2-1);
-                Console.WriteLine(target);
-
-                teleportcommand.setTarget(target);
-                teleportcommand.Execute(fromUUID, fromName, message, type);
-
-            } else if (message.Contains("終了")) {
-                if (fromName != this.owner) {
-                    string mes = "Exit order revoked.";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                this.mclient.Network.Logout();
-            } else if (message.Contains("グループ")) {
-                // グループタグに関係しそうなとこ
-                // https://github.com/cinderblocks/libremetaverse/blob/e26ae695fed27e43a510a85d786abbac2552d051/Programs/examples/TestClient/Commands/Groups/GroupRolesCommand.cs
-                // https://github.com/cinderblocks/libremetaverse/blob/e26ae695fed27e43a510a85d786abbac2552d051/Programs/examples/TestClient/Commands/Groups/ActivateGroupCommand.cs
-                //string groupName = "泪橋";
-
-                int index = message.IndexOf("グループ");
-                int index2 = message.IndexOf(" ", index);
-                if (index2 == -1) {
-                    string mes = "グループ名を指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                string groupName = message.Substring(index2+1, message.Length - index2-1);
-                Console.WriteLine(groupName);
-
-                UUID groupUUID = this.mclient.GroupName2UUID(groupName);
-                Console.WriteLine(groupUUID);
-                if (UUID.Zero != groupUUID) {
-                    EventHandler<PacketReceivedEventArgs> pcallback = AgentDataUpdateHandler;
-                    this.mclient.Network.RegisterCallback(PacketType.AgentDataUpdate, pcallback);
-
-                    Console.WriteLine("setting " + groupName + " as active group");
-                    this.mclient.Groups.ActivateGroup(groupUUID);
-                    GroupsEvent.WaitOne(30000, false);
-
-                    this.mclient.Network.UnregisterCallback(PacketType.AgentDataUpdate, pcallback);
-                    GroupsEvent.Reset();
-
-                    if (String.IsNullOrEmpty(activeGroup))
-                    Console.WriteLine(this.mclient.ToString() + " failed to activate the group " + groupName);
-                }
-            } else if (message.Contains("帰") || message.Contains("戻")) {
-                this.loiter = false;
-                string mes = "お家へ帰りまーす！";
-                if (String.IsNullOrEmpty(this.home)) {
-                    mes = "お家がありません・・・";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                this.mclient.Say(fromUUID, mes, 0, type);
-
-                standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
-
-                //this.mclient.Self.GoHome();
-                string target = this.home;
-                teleportcommand.setTarget(target);
-                teleportcommand.Execute(fromUUID, fromName, message, type);
-
-            //} else if (message.Contains("sethome")) {
-            //    this.mclient.Self.SetHome();
-            //    string mes = "ここをホームに設定しました";
-            //    this.mclient.Say(fromUUID, mes, 0, type);
-            } else if (message.Contains("チャットモード")) {
-                string mes = "";
-                if (message.Contains("指名")) {
-                    this.chatMode = ChatMode.Nominate;
-                    mes = "チャットモードを指名モードに変更しました。";
-                    foreach (var nickname in this.nicknames) {
-                        mes += nickname + ",";
-                    }
-                    mes += "から始まる言葉のみ反応します。";
-                } else if (message.Contains("全レス")) {
-                    this.chatMode = ChatMode.All;
-                    mes = "チャットモードを全レスモードに変更しました。うるさい場合は指名モードにしてください。";
-                }
-                this.mclient.Say(fromUUID, mes, 0, type);
-            } else if (message.Contains("チャットAPI")) {
-                string mes = "";
-                if (message.Contains("chatplus")) {
-                    this.chatApi = ChatApi.chatplus;
-                    mes = "チャットAPIをchatplusに変更しました。会話のドッジボールをお楽しみください。";
-                } else if (message.Contains("mebo")) {
-                    this.chatApi = ChatApi.mebo;
-                    mes = "チャットAPIをmeboに変更しました。会話のラリーをお楽しみください。";
-                } else if (message.Contains("openai")) {
-                    this.chatApi = ChatApi.openai;
-                    mes = "チャットAPIをOpenAIに変更しました。イーロン・マスクをお楽しみください。";
-                }
-                this.mclient.Say(fromUUID, mes, 0, type);
-            } else if (message.Contains("どこ")) {
-                string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();
-                Vector3 globalPos = this.getCurrentGlobalPosition();
-                mes += "\n" + "グローバル座標:" + globalPos.X + "," + globalPos.Y + "." + globalPos.Z;
-                this.mclient.Say(fromUUID, mes, 0, type);
-            } else if(message.Contains("チャンネルチャット")) {
-                string mes = "";
-                int index = message.IndexOf("チャンネルチャット");
-                int index2 = message.IndexOf(" ", index);
-                if (index2 == -1) {
-                    mes = "チャンネル番号を指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                int index3 = message.IndexOf(" ", index2+1);
-                if (index3 == -1) {
-                    mes = "押したいボタンを指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-
-                string channel = message.Substring(index2+1, index3 - index2-1); // わからん！スペースで一回配列にしたほうがいいのか？
-                string button = message.Substring(index3+1,message.Length - index3-1);
-                mes = "チャンネル:" + Int32.Parse(channel).ToString() + ",押したいボタン:" + button;
-                this.mclient.Say(fromUUID, mes, 0, type);
-
-                // FIX ME: マイナスチャンネルでの発言が通らない
-                this.mclient.Self.Chat(button, Int32.Parse(channel), ChatType.Normal);
-
-                // MEGABOLTの実装
-                //this.mclient.Self.ReplyToScriptDialog(ed.Channel, butindex, butlabel, ed.ObjectID);
-            } else if (message.Contains("ボタンクリック")) {
-                string mes = "";
-                int index = message.IndexOf("ボタンクリック");
-                int index2 = message.IndexOf(" ", index);
-                string arrString = message.Substring(index2+1, message.Length - index2-1);
-                string[] arr =  arrString.Split(' ');
-
-                if (arr.Length == 0) {
-                    mes = "チャンネル番号を指定してください";
-                } else if (arr.Length == 1) {
-                    mes = "インデックスを指定してください";
-                } else if (arr.Length == 2) {
-                    mes = "ボタン名を指定してください";
-                } else if (arr.Length == 3) {
-                    mes = "オブジェクトIDを指定してください";
-                }
-                if (mes.Length > 0) {
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                string channel = arr[0];
-                string btnIndex = arr[1];
-                string btnLabel = arr[2];
-                string objectId = arr[3];
-                //mes = channel + "," + btnIndex + "," + btnLabel + "," + objectId;
-                //this.mclient.Say(fromUUID, mes, 0, type);
-
-                this.mclient.Self.ReplyToScriptDialog(Int32.Parse(channel), Int32.Parse(btnIndex), btnLabel, UUID.Parse(objectId));
-            } else if (message.Contains("前へ")) {
-                movecommand.Forward();
-            } else if (message.Contains("後ろへ")) {
-                movecommand.Back();
-            } else if (message.Contains("右へ")) {
-                movecommand.Right();
-            } else if (message.Contains("左へ")) {
-                movecommand.Left();
-            } else if (message.Contains("うろうろ")) {
-                //this.findRandomObject();
-                //this.targetPrim = this.getNextPrim();
-                this.followTarget = null;
-                this.loiterStartRegionPos = this.mclient.Self.SimPosition;
-                this.loiter = true;
-            } else if (message.Contains("ランダム発言")) {
-                string mes = "";
-                string arg = message.ToLower();
-                if (arg.Contains("on")) {
-                    this.randomChat = true;
-                    mes = "ランダム発言をONにしました。邪魔なときな「立川君ランダム発言 OFF」と命令してください。";
-                } else if (arg.Contains("off")) {
-                    this.randomChat = false;
-                    mes = "ランダム発言をOFFにしました。寂しいときな「立川君ランダム発言 ON」と命令してください。";
-                }
-                this.mclient.Say(fromUUID, mes, 0, type);
-            } else if (message.Contains("アニメリスト")) {
-                animationcommand.list(fromUUID, fromName, message, type);
-            } else if (message.Contains("アニメ")) {
-                int index = message.IndexOf("アニメ");
-                int index2 = message.IndexOf(" ", index);
-                if (index2 == -1) {
-                    string mes = "アニメーション名を指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                string animName = message.Substring(index2+1, message.Length - index2-1);
-                animationcommand.play(animName);
-            } else if (message.Contains("踊")) {
-                Random r = new System.Random();
-                int next = r.Next(1, 7);
-                string danceanim = "DANCE" + next.ToString();
-                animationcommand.play(danceanim);
-            } else if (message.Contains("Second Life") || message.Contains("SecondLife") || message.Contains("セカンドライフ")) {
-                this.mclient.Say(fromUUID, await SecondLifeFeedCommand.feed(), 0, type);
-            } else if (message.Contains("アイテムリスト")) {
-                UUID folderUUID = UUID.Zero;
-                List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
-                if (contents != null) {
-                    foreach (InventoryBase i in contents) {
-                        if (i.Name == "Objects") {
-                            folderUUID = i.UUID;
-                            break;
-                        }
-                        //if (i is InventoryFolder folder) {
-                        //    // TODO: Nest
-                        //}
-                    }
-                } else {
-                    Console.WriteLine("Objects folder not found");
-                    return;
-                }
-
-                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
-                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
-
-                ItemEvent.WaitOne(30000, false);
-                List<InventoryItem> items = new List<InventoryItem>();
-                contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
-                if (contents == null) {
-                    Console.WriteLine("Failed to get contents of " + "Objects");
-                    return;
-                }
-                string mes = "";
-                foreach (InventoryBase item in contents)
-                {
-                    mes += item.Name + ",\n";
-                }
-                this.mclient.Say(fromUUID, mes, 0, type);
-
-            } else if (message.Contains("attach")) {
-                if (fromName != this.owner) {
-                    string mes = "attach order revoked." + fromName + "," + this.owner;
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                int index = message.IndexOf("attach");
-                int index2 = message.IndexOf(" ", index);
-                if (index2 == -1) {
-                    string mes = "アイテム名称を指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                string itemName = message.Substring(index2+1, message.Length - index2-1);
-                Console.WriteLine(itemName);
-
-                UUID folderUUID = UUID.Zero;
-                List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
-                if (contents != null) {
-                    foreach (InventoryBase i in contents) {
-                        if (i.Name == "Objects") {
-                            folderUUID = i.UUID;
-                            break;
-                        }
-                        //if (i is InventoryFolder folder) {
-                        //    // TODO: Nest
-                        //}
-                    }
-                } else {
-                    Console.WriteLine("Objects folder not found");
-                    return;
-                }
-
-                //UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
-                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
-                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
-
-                ItemEvent.WaitOne(30000, false);
-                //UUID itemUUid = new UUID("0ba3cfeb-7417-7be4-0df9-1288625d5470"); // Fairy Wings I SUPPORT UKRAINE v11
-                ////FIX ME: item null
-                //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
-                //if (item == null) {
-                //    Console.WriteLine("attach item is null");
-                //    return;
-                //}
-                ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
-                /*List<InventoryBase> */contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
-                List<InventoryItem> items = new List<InventoryItem>();
-                if (contents == null) {
-                    Console.WriteLine("Failed to get contents of " + "Objects");
-                    return;
-                }
-                foreach (InventoryBase item in contents)
-                {
-                    if (item is InventoryItem inventoryItem) {
-                        items.Add(inventoryItem);
-                        if (inventoryItem.Name.Contains(itemName)) {
-                            this.mclient.Appearance.Attach(inventoryItem, AttachmentPoint.Default);
-                            Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
-                            break;
-                        }
-                    }
-                }
-            } else if (message.Contains("detach")) {
-                int index = message.IndexOf("detach");
-                int index2 = message.IndexOf(" ", index);
-                if (index2 == -1) {
-                    string mes = "アイテム名称を指定してください";
-                    this.mclient.Say(fromUUID, mes, 0, type);
-                    return;
-                }
-                string itemName = message.Substring(index2+1, message.Length - index2-1);
-                Console.WriteLine(itemName);
-
-                UUID folderUUID = UUID.Zero;
-                List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
-                if (contents != null) {
-                    foreach (InventoryBase i in contents) {
-                        if (i.Name == "Objects") {
-                            folderUUID = i.UUID;
-                            break;
-                        }
-                        //if (i is InventoryFolder folder) {
-                        //    // TODO: Nest
-                        //}
-                    }
-                } else {
-                    Console.WriteLine("Objects folder not found");
-                    return;
-                }
-                //UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
-                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
-                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
-
-                ItemEvent.WaitOne(30000, false);
-                //UUID itemUUid = new UUID("0ba3cfeb-7417-7be4-0df9-1288625d5470"); // Fairy Wings I SUPPORT UKRAINE v11
-                ////FIX ME: item null
-                //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
-                ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
-                //if (item == null) {
-                //    Console.WriteLine("detach item is null");
-                //    return;
-                //}
-                /*List<InventoryBase> */contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
-                List<InventoryItem> items = new List<InventoryItem>();
-                if (contents == null) {
-                    Console.WriteLine("Failed to get contents of " + "Objects");
-                    return;
-                }
-                foreach (InventoryBase item in contents)
-                {
-                    if (item is InventoryItem inventoryItem) {
-                        items.Add(inventoryItem);
-                        if (inventoryItem.Name.Contains(itemName)) {
-                            this.mclient.Appearance.Detach(inventoryItem);
-                            Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
-                            break;
-                        }
-                    }
-                }
-            } else if (message.Contains("インベントリ表示")) {
-                this.inventorylistcommand.Execute(fromUUID, fromName, message, type);
-            } else if (message.Contains("Appearance")) {
-                // CAUTION: 現在実装が不完全です
-
-                //string[] args = new String[]{"Clothing/kani"}; // Clothing/kani
-                //string appearance = args.Aggregate(string.Empty, (current, t) => current + (t + " "));
-                //appearance = appearance.TrimEnd();
-                //// FIX ME: フォルダが見つけられない
-                //UUID folder = this.mclient.Inventory.FindObjectByPath(this.mclient.Inventory.Store.RootFolder.UUID, this.mclient.Self.AgentID, appearance, 20 * 1000);
-                //if (folder == UUID.Zero) {
-                //    Console.WriteLine("Outfit path " + appearance + " not found");
-                //    return;
-                //}
-
-                // ERROR - Failed to fetch the current agent wearables, cannot safely replace outfit
-                // AppearanceManager.cs if (needsCurrentWearables && !GetAgentWearables())
-                // kani 0b329337-02d8-0aad-4202-ece611bf500e
-                // nuko ef676e23-ea67-0abb-6e67-03e9d499e43a
-                UUID folderUUID = new UUID("0b329337-02d8-0aad-4202-ece611bf500e");
-                InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
-                this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
-
-                ItemEvent.WaitOne(30000, false);
-                List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
-                List<InventoryItem> items = new List<InventoryItem>();
-                if (contents == null) {
-                    Console.WriteLine("Failed to get contents of " + "nuko");
-                    return;
-                }
-                foreach (InventoryBase item in contents)
-                {
-                    if (item is InventoryItem inventoryItem)
-                        items.Add(inventoryItem);
-                }
-                var lockSlim = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
-                lockSlim.EnterWriteLock();
-                this.mclient.Appearance.ReplaceOutfit(items, false);
-                lockSlim.ExitWriteLock();
-                this.mclient.Appearance.RequestSetAppearance(true);
-            } else if (message.Contains("shoot")) {
-                this.mclient.Self.Movement.Mouselook = true;
-                this.mclient.Self.Movement.MLButtonDown = true;
-                this.mclient.Self.Movement.SendUpdate();
-
-                this.mclient.Self.Movement.MLButtonUp = true;
-                this.mclient.Self.Movement.MLButtonDown = false;
-                this.mclient.Self.Movement.FinishAnim = true;
-                this.mclient.Self.Movement.SendUpdate();
-
-                this.mclient.Self.Movement.Mouselook = false;
-                this.mclient.Self.Movement.MLButtonUp = false;
-                this.mclient.Self.Movement.FinishAnim = false;
-                this.mclient.Self.Movement.SendUpdate();
-            } else if (message.Contains("デバッグ")) {
-            } else {
+            if (!commandFound) {
                 try {
                     this.scriptEngine.ExecuteFile(this.script, this.scriptScope);
                     dynamic scommand = this.scriptScope.GetVariable(@"command");
@@ -848,8 +382,567 @@ namespace SecondBot.Client {
                     Console.WriteLine(e.Message);
                 }
             }
-
         }
+        bool commandSearch(UUID fromUUID, string fromName, string message ,int type) {
+            foreach (var comm in commandDic) {
+                foreach(var comstring in comm.Value) {
+                    Console.WriteLine(comstring);
+                    if (message.ToLower().Contains(comstring.ToLower())) {
+                        Type t = this.GetType();
+                        MethodInfo? mi = t.GetMethod(comm.Key, BindingFlags.InvokeMethod | BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (mi != null) mi.Invoke(this, new object[] {fromUUID, fromName, message, type});
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+#region commands
+        void helpCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string commandList = Constants.COMMANDS;
+            this.mclient.Say(fromUUID, commandList, 0, type, false);
+        }
+        void manualCommand(UUID fromUUID, string fromName, string message ,int type) {
+            createnotecardcommand.Execute(fromUUID, fromName, message, type);
+        }
+        void galmojiConvCommand(UUID fromUUID, string fromName, string message ,int type) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
+                string mes = "引数を指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            this.mclient.Say(fromUUID, this.mclient.GetGalMoji(arr1[arr1.Length-1]), 0, type);
+        }
+        void galmojiCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "";
+            string arg = message.ToLower();
+            if (arg.Contains("on")) {
+                this.mclient.galMojiMode = true;
+                mes = "ギャル文字をONにしました。OFFにするとき「立川君ギャル文字 OFF」と命令してください。";
+            } else if (arg.Contains("off")) {
+                this.mclient.galMojiMode = false;
+                mes = "ギャル文字をOFFにしました。ONにするとき「立川君ギャル文字 ON」と命令してください。";
+            }
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void sitCommand(UUID fromUUID, string fromName, string message ,int type) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
+                string mes = "UUIDを指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            standupcommand.setCurrentAnims(this.currentAnims);
+            standupcommand.Execute(fromUUID, fromName, message, type);
+
+            string target_uuid_string = arr1[arr1.Length-1];
+            Console.WriteLine("target:" + target_uuid_string);
+
+            UUID target = new UUID(target_uuid_string);
+            this.mclient.Self.RequestSit(target, Vector3.Zero);
+            this.mclient.Self.Sit();
+        }
+        void touchCommand(UUID fromUUID, string fromName, string message ,int type) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
+                string mes = "UUIDを指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+
+            string target_uuid_string = arr1[arr1.Length-1];
+            UUID target;
+            if (UUID.TryParse(target_uuid_string, out target)) {
+                Primitive targetPrim = this.mclient.Network.CurrentSim.ObjectsPrimitives.Find(
+                    prim => prim.ID == target
+                );
+
+                if (targetPrim != null) {
+                    this.mclient.Self.Touch(targetPrim.LocalID);
+                } else {
+                    string mes = "オブジェクトが見つかりませんでした";
+                    this.mclient.Say(fromUUID, mes, 0, type);
+                }
+            }
+        }
+        void restCommand(UUID fromUUID, string fromName, string message ,int type) {
+            if (String.IsNullOrEmpty(this.bed)) {
+                string mes = "ベッドがありません・・・";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            string target_uuid_string = this.bed;
+            UUID target = new UUID(target_uuid_string);
+            this.mclient.Self.RequestSit(target, Vector3.Zero);
+            this.mclient.Self.Sit();
+        }
+        void standCommand(UUID fromUUID, string fromName, string message ,int type) {
+            standupcommand.setCurrentAnims(this.currentAnims);
+            standupcommand.Execute(fromUUID, fromName, message, type);
+        }
+        void followCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.loiter = false;
+            this.mclient.Self.AutoPilotCancel();
+            standupcommand.setCurrentAnims(this.currentAnims);
+            standupcommand.Execute(fromUUID, fromName, message, type);
+
+            //followTarget = e.SourceID;
+            followTarget = fromName;
+            Console.WriteLine(followTarget.ToString());
+        }
+        void stopCommand(UUID fromUUID, string fromName, string message ,int type) {
+            followTarget = null;
+            this.loiter = false;
+            standupcommand.setCurrentAnims(this.currentAnims);
+            standupcommand.Execute(fromUUID, fromName, message, type);
+            this.mclient.Self.AutoPilotCancel();
+        }
+        void teleportCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.loiter = false;
+            int index = message.IndexOf("テレポ");
+            int index2 = message.IndexOf(" ", index);
+            if (index2 == -1) {
+                string mes = "宛先をsim名/x/y/zで指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+
+            standupcommand.setCurrentAnims(this.currentAnims);
+            standupcommand.Execute(fromUUID, fromName, message, type);
+            string target = message.Substring(index2+1, message.Length - index2-1);
+            Console.WriteLine(target);
+
+            teleportcommand.setTarget(target);
+            teleportcommand.Execute(fromUUID, fromName, message, type);
+        }
+        void exitCommand(UUID fromUUID, string fromName, string message ,int type) {
+            if (fromName != this.owner) {
+                string mes = "Exit order revoked.";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            this.mclient.Network.Logout();
+        }
+        void groupCommand(UUID fromUUID, string fromName, string message ,int type) {
+            // グループタグに関係しそうなとこ
+            // https://github.com/cinderblocks/libremetaverse/blob/e26ae695fed27e43a510a85d786abbac2552d051/Programs/examples/TestClient/Commands/Groups/GroupRolesCommand.cs
+            // https://github.com/cinderblocks/libremetaverse/blob/e26ae695fed27e43a510a85d786abbac2552d051/Programs/examples/TestClient/Commands/Groups/ActivateGroupCommand.cs
+            //string groupName = "泪橋";
+
+            int index = message.IndexOf("グループ");
+            int index2 = message.IndexOf(" ", index);
+            if (index2 == -1) {
+                string mes = "グループ名を指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            string groupName = message.Substring(index2+1, message.Length - index2-1);
+            Console.WriteLine(groupName);
+
+            UUID groupUUID = this.mclient.GroupName2UUID(groupName);
+            Console.WriteLine(groupUUID);
+            if (UUID.Zero != groupUUID) {
+                EventHandler<PacketReceivedEventArgs> pcallback = AgentDataUpdateHandler;
+                this.mclient.Network.RegisterCallback(PacketType.AgentDataUpdate, pcallback);
+
+                Console.WriteLine("setting " + groupName + " as active group");
+                this.mclient.Groups.ActivateGroup(groupUUID);
+                GroupsEvent.WaitOne(30000, false);
+
+                this.mclient.Network.UnregisterCallback(PacketType.AgentDataUpdate, pcallback);
+                GroupsEvent.Reset();
+
+                if (String.IsNullOrEmpty(activeGroup))
+                Console.WriteLine(this.mclient.ToString() + " failed to activate the group " + groupName);
+            }
+        }
+        void gotoHomeCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.loiter = false;
+            string mes = "お家へ帰りまーす！";
+            if (String.IsNullOrEmpty(this.home)) {
+                mes = "お家がありません・・・";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            this.mclient.Say(fromUUID, mes, 0, type);
+
+            standupcommand.setCurrentAnims(this.currentAnims);
+            standupcommand.Execute(fromUUID, fromName, message, type);
+
+            //this.mclient.Self.GoHome();
+            string target = this.home;
+            teleportcommand.setTarget(target);
+            teleportcommand.Execute(fromUUID, fromName, message, type);
+        }
+        void setHomeCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.mclient.Self.SetHome();
+            string mes = "ここをホームに設定しました";
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void chatModeCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "";
+            if (message.Contains("指名")) {
+                this.chatMode = ChatMode.Nominate;
+                mes = "チャットモードを指名モードに変更しました。";
+                foreach (var nickname in this.nicknames) {
+                    mes += nickname + ",";
+                }
+                mes += "から始まる言葉のみ反応します。";
+            } else if (message.Contains("全レス")) {
+                this.chatMode = ChatMode.All;
+                mes = "チャットモードを全レスモードに変更しました。うるさい場合は指名モードにしてください。";
+            }
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void chatApiCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "";
+            if (message.Contains("chatplus")) {
+                this.chatApi = ChatApi.chatplus;
+                mes = "チャットAPIをchatplusに変更しました。会話のドッジボールをお楽しみください。";
+            } else if (message.Contains("mebo")) {
+                this.chatApi = ChatApi.mebo;
+                mes = "チャットAPIをmeboに変更しました。会話のラリーをお楽しみください。";
+            } else if (message.Contains("openai")) {
+                this.chatApi = ChatApi.openai;
+                mes = "チャットAPIをOpenAIに変更しました。イーロン・マスクをお楽しみください。";
+            }
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void whereCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "Sim: " + this.mclient.Network.CurrentSim.ToString() + "' Position: " + this.mclient.Self.SimPosition.ToString();
+            Vector3 globalPos = this.getCurrentGlobalPosition();
+            mes += "\n" + "グローバル座標:" + globalPos.X + "," + globalPos.Y + "." + globalPos.Z;
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void channelChatCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "";
+            int index = message.IndexOf("チャンネルチャット");
+            int index2 = message.IndexOf(" ", index);
+            if (index2 == -1) {
+                mes = "チャンネル番号を指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            int index3 = message.IndexOf(" ", index2+1);
+            if (index3 == -1) {
+                mes = "押したいボタンを指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+
+            string channel = message.Substring(index2+1, index3 - index2-1); // わからん！スペースで一回配列にしたほうがいいのか？
+            string button = message.Substring(index3+1,message.Length - index3-1);
+            mes = "チャンネル:" + Int32.Parse(channel).ToString() + ",押したいボタン:" + button;
+            this.mclient.Say(fromUUID, mes, 0, type);
+
+            // FIX ME: マイナスチャンネルでの発言が通らない
+            this.mclient.Self.Chat(button, Int32.Parse(channel), ChatType.Normal);
+
+            // MEGABOLTの実装
+            //this.mclient.Self.ReplyToScriptDialog(ed.Channel, butindex, butlabel, ed.ObjectID);
+        }
+        void buttonClickCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "";
+            int index = message.IndexOf("ボタンクリック");
+            int index2 = message.IndexOf(" ", index);
+            string arrString = message.Substring(index2+1, message.Length - index2-1);
+            string[] arr =  arrString.Split(' ');
+
+            if (arr.Length == 0) {
+                mes = "チャンネル番号を指定してください";
+            } else if (arr.Length == 1) {
+                mes = "インデックスを指定してください";
+            } else if (arr.Length == 2) {
+                mes = "ボタン名を指定してください";
+            } else if (arr.Length == 3) {
+                mes = "オブジェクトIDを指定してください";
+            }
+            if (mes.Length > 0) {
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            string channel = arr[0];
+            string btnIndex = arr[1];
+            string btnLabel = arr[2];
+            string objectId = arr[3];
+            //mes = channel + "," + btnIndex + "," + btnLabel + "," + objectId;
+            //this.mclient.Say(fromUUID, mes, 0, type);
+
+            this.mclient.Self.ReplyToScriptDialog(Int32.Parse(channel), Int32.Parse(btnIndex), btnLabel, UUID.Parse(objectId));
+        }
+        void forwardCommand(UUID fromUUID, string fromName, string message ,int type) {
+            movecommand.Forward();
+        }
+        void backCommand(UUID fromUUID, string fromName, string message ,int type) {
+            movecommand.Back();
+        }
+        void rightCommand(UUID fromUUID, string fromName, string message ,int type) {
+            movecommand.Right();
+        }
+        void leftCommand(UUID fromUUID, string fromName, string message ,int type) {
+            movecommand.Left();
+        }
+        void loiterCommand(UUID fromUUID, string fromName, string message ,int type) {
+            //this.findRandomObject();
+            //this.targetPrim = this.getNextPrim();
+            this.followTarget = null;
+            this.loiterStartRegionPos = this.mclient.Self.SimPosition;
+            this.loiter = true;
+        }
+        void randomCommand(UUID fromUUID, string fromName, string message ,int type) {
+            string mes = "";
+            string arg = message.ToLower();
+            if (arg.Contains("on")) {
+                this.randomChat = true;
+                mes = "ランダム発言をONにしました。邪魔なときな「立川君ランダム発言 OFF」と命令してください。";
+            } else if (arg.Contains("off")) {
+                this.randomChat = false;
+                mes = "ランダム発言をOFFにしました。寂しいときな「立川君ランダム発言 ON」と命令してください。";
+            }
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void animListCommand(UUID fromUUID, string fromName, string message ,int type) {
+            animationcommand.list(fromUUID, fromName, message, type);
+        }
+        void animCommand(UUID fromUUID, string fromName, string message ,int type) {
+            int index = message.IndexOf("アニメ");
+            int index2 = message.IndexOf(" ", index);
+            if (index2 == -1) {
+                string mes = "アニメーション名を指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            string animName = message.Substring(index2+1, message.Length - index2-1);
+            animationcommand.play(animName);
+        }
+        void danceCommand(UUID fromUUID, string fromName, string message ,int type) {
+            Random r = new System.Random();
+            int next = r.Next(1, 7);
+            string danceanim = "DANCE" + next.ToString();
+            animationcommand.play(danceanim);
+        }
+        async void secondLifeCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.mclient.Say(fromUUID, await SecondLifeFeedCommand.feed(), 0, type);
+        }
+        void itemListCommand(UUID fromUUID, string fromName, string message ,int type) {
+            UUID folderUUID = UUID.Zero;
+            List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
+            if (contents != null) {
+                foreach (InventoryBase i in contents) {
+                    if (i.Name == "Objects") {
+                        folderUUID = i.UUID;
+                        break;
+                    }
+                    //if (i is InventoryFolder folder) {
+                    //    // TODO: Nest
+                    //}
+                }
+            } else {
+                Console.WriteLine("Objects folder not found");
+                return;
+            }
+
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            List<InventoryItem> items = new List<InventoryItem>();
+            contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "Objects");
+                return;
+            }
+            string mes = "";
+            foreach (InventoryBase item in contents)
+            {
+                mes += item.Name + ",\n";
+            }
+            this.mclient.Say(fromUUID, mes, 0, type);
+        }
+        void attachCommand(UUID fromUUID, string fromName, string message ,int type) {
+            if (fromName != this.owner) {
+                string mes = "attach order revoked." + fromName + "," + this.owner;
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            int index = message.IndexOf("attach");
+            int index2 = message.IndexOf(" ", index);
+            if (index2 == -1) {
+                string mes = "アイテム名称を指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            string itemName = message.Substring(index2+1, message.Length - index2-1);
+            Console.WriteLine(itemName);
+
+            UUID folderUUID = UUID.Zero;
+            List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
+            if (contents != null) {
+                foreach (InventoryBase i in contents) {
+                    if (i.Name == "Objects") {
+                        folderUUID = i.UUID;
+                        break;
+                    }
+                    //if (i is InventoryFolder folder) {
+                    //    // TODO: Nest
+                    //}
+                }
+            } else {
+                Console.WriteLine("Objects folder not found");
+                return;
+            }
+
+            //UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            //UUID itemUUid = new UUID("0ba3cfeb-7417-7be4-0df9-1288625d5470"); // Fairy Wings I SUPPORT UKRAINE v11
+            ////FIX ME: item null
+            //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
+            //if (item == null) {
+            //    Console.WriteLine("attach item is null");
+            //    return;
+            //}
+            ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
+            /*List<InventoryBase> */contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            List<InventoryItem> items = new List<InventoryItem>();
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "Objects");
+                return;
+            }
+            foreach (InventoryBase item in contents)
+            {
+                if (item is InventoryItem inventoryItem) {
+                    items.Add(inventoryItem);
+                    if (inventoryItem.Name.Contains(itemName)) {
+                        this.mclient.Appearance.Attach(inventoryItem, AttachmentPoint.Default);
+                        Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
+                        break;
+                    }
+                }
+            }
+        }
+        void detachCommand(UUID fromUUID, string fromName, string message ,int type) {
+            int index = message.IndexOf("detach");
+            int index2 = message.IndexOf(" ", index);
+            if (index2 == -1) {
+                string mes = "アイテム名称を指定してください";
+                this.mclient.Say(fromUUID, mes, 0, type);
+                return;
+            }
+            string itemName = message.Substring(index2+1, message.Length - index2-1);
+            Console.WriteLine(itemName);
+
+            UUID folderUUID = UUID.Zero;
+            List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(this.mclient.Inventory.Store.RootFolder.UUID);
+            if (contents != null) {
+                foreach (InventoryBase i in contents) {
+                    if (i.Name == "Objects") {
+                        folderUUID = i.UUID;
+                        break;
+                    }
+                    //if (i is InventoryFolder folder) {
+                    //    // TODO: Nest
+                    //}
+                }
+            } else {
+                Console.WriteLine("Objects folder not found");
+                return;
+            }
+            //UUID folderUUID = new UUID("d5131324-0362-4556-992e-65a912d515dd"); // Objects
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            //UUID itemUUid = new UUID("0ba3cfeb-7417-7be4-0df9-1288625d5470"); // Fairy Wings I SUPPORT UKRAINE v11
+            ////FIX ME: item null
+            //InventoryItem item = this.mclient.Inventory.FetchItem(itemUUid, this.mclient.Self.AgentID, 1000);
+            ////InventoryItem item = (InventoryItem)this.mclient.Inventory.Store[itemUUid];
+            //if (item == null) {
+            //    Console.WriteLine("detach item is null");
+            //    return;
+            //}
+            /*List<InventoryBase> */contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            List<InventoryItem> items = new List<InventoryItem>();
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "Objects");
+                return;
+            }
+            foreach (InventoryBase item in contents)
+            {
+                if (item is InventoryItem inventoryItem) {
+                    items.Add(inventoryItem);
+                    if (inventoryItem.Name.Contains(itemName)) {
+                        this.mclient.Appearance.Detach(inventoryItem);
+                        Console.WriteLine(inventoryItem.Name + "," + inventoryItem.UUID.ToString());
+                        break;
+                    }
+                }
+            }
+        }
+        void inventoryCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.inventorylistcommand.Execute(fromUUID, fromName, message, type);
+        }
+        void appearanceCommand(UUID fromUUID, string fromName, string message ,int type) {
+            // CAUTION: 現在実装が不完全です
+
+            //string[] args = new String[]{"Clothing/kani"}; // Clothing/kani
+            //string appearance = args.Aggregate(string.Empty, (current, t) => current + (t + " "));
+            //appearance = appearance.TrimEnd();
+            //// FIX ME: フォルダが見つけられない
+            //UUID folder = this.mclient.Inventory.FindObjectByPath(this.mclient.Inventory.Store.RootFolder.UUID, this.mclient.Self.AgentID, appearance, 20 * 1000);
+            //if (folder == UUID.Zero) {
+            //    Console.WriteLine("Outfit path " + appearance + " not found");
+            //    return;
+            //}
+
+            // ERROR - Failed to fetch the current agent wearables, cannot safely replace outfit
+            // AppearanceManager.cs if (needsCurrentWearables && !GetAgentWearables())
+            // kani 0b329337-02d8-0aad-4202-ece611bf500e
+            // nuko ef676e23-ea67-0abb-6e67-03e9d499e43a
+            UUID folderUUID = new UUID("0b329337-02d8-0aad-4202-ece611bf500e");
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            List<InventoryItem> items = new List<InventoryItem>();
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "nuko");
+                return;
+            }
+            foreach (InventoryBase item in contents)
+            {
+                if (item is InventoryItem inventoryItem)
+                    items.Add(inventoryItem);
+            }
+            var lockSlim = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+            lockSlim.EnterWriteLock();
+            this.mclient.Appearance.ReplaceOutfit(items, false);
+            lockSlim.ExitWriteLock();
+            this.mclient.Appearance.RequestSetAppearance(true);
+        }
+        void shootCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.mclient.Self.Movement.Mouselook = true;
+            this.mclient.Self.Movement.MLButtonDown = true;
+            this.mclient.Self.Movement.SendUpdate();
+
+            this.mclient.Self.Movement.MLButtonUp = true;
+            this.mclient.Self.Movement.MLButtonDown = false;
+            this.mclient.Self.Movement.FinishAnim = true;
+            this.mclient.Self.Movement.SendUpdate();
+
+            this.mclient.Self.Movement.Mouselook = false;
+            this.mclient.Self.Movement.MLButtonUp = false;
+            this.mclient.Self.Movement.FinishAnim = false;
+            this.mclient.Self.Movement.SendUpdate();
+        }
+        void debugCommand(UUID fromUUID, string fromName, string message ,int type) {
+        }
+#endregion
 
         private Primitive? getNextPrim() {
             if (this.MovementTargetPrims == null) return null;
