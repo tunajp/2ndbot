@@ -983,7 +983,7 @@ namespace SecondBot.Client {
                 if (d.TotalSeconds > Constants.RANDOM_CHAT_TIMER) {
                     Console.WriteLine("ランダムな発言");
                     Random r = new System.Random();
-                    int max = 3; // 0-2
+                    int max = 4; // 0-3
                     if (this.chatApi == ChatApi.openai) {
                         max = 2; // 0-1
                     }

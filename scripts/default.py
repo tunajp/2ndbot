@@ -39,6 +39,7 @@ def Network_OnLogin():
 # 寝たら死ぬぞ 7ce31c3b-437a-cd46-e360-738df8c8e211
 # また髪の話してる f28fd398-26ce-5bdc-976d-7e53bd9c478d
 # ありまたお 68ca4eb0-4b4d-4dce-39fb-df6f5e08fee9
+# いえーい f9023d35-f9ca-10de-f59d-de14d847b698
 def chatBeforHook(fromUUID, fromName, message, type):
     if "うさうさ❤" in message:
         Thread.Sleep(1000)
@@ -59,6 +60,18 @@ def chatBeforHook(fromUUID, fromName, message, type):
     elif "髪" in message:
         Thread.Sleep(1000)
         mclient.Self.PlayGesture(UUID("f28fd398-26ce-5bdc-976d-7e53bd9c478d"))
+        return False
+    elif "Yayyyyyyy" in message:
+        Thread.Sleep(1000)
+        mclient.Self.PlayGesture(UUID("f9023d35-f9ca-10de-f59d-de14d847b698"))
+        return False
+    elif "YAY" in message:
+        Thread.Sleep(1000)
+        mclient.Self.PlayGesture(UUID("f9023d35-f9ca-10de-f59d-de14d847b698"))
+        return False
+    elif "イエェェェェ" in message:
+        Thread.Sleep(1000)
+        mclient.Self.PlayGesture(UUID("f9023d35-f9ca-10de-f59d-de14d847b698"))
         return False
     else:
         return True
@@ -168,6 +181,8 @@ def randomGesture(num):
     elif num == 2:
         # qawsedrftgyhujikolp
         mclient.Self.PlayGesture(UUID("f364e06e-b6b4-a1f1-b90f-c1d82ffda937"))
+    elif num == 3:
+        mclient.Self.PlayGesture(UUID("f9023d35-f9ca-10de-f59d-de14d847b698"))
     else:
         # もさもさ
         mclient.Self.PlayGesture(UUID("35d735ea-8902-2b4c-46b6-70e27954af7e"))
