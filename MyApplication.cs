@@ -501,9 +501,8 @@ namespace SecondBot.Client {
         }
         void teleportCommand(UUID fromUUID, string fromName, string message ,int type) {
             this.loiter = false;
-            int index = message.IndexOf("テレポ");
-            int index2 = message.IndexOf(" ", index);
-            if (index2 == -1) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
                 string mes = "宛先をsim名/x/y/zで指定してください";
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
@@ -511,7 +510,7 @@ namespace SecondBot.Client {
 
             standupcommand.setCurrentAnims(this.currentAnims);
             standupcommand.Execute(fromUUID, fromName, message, type);
-            string target = message.Substring(index2+1, message.Length - index2-1);
+            string target = arr1[arr1.Length-1];
             Console.WriteLine(target);
 
             teleportcommand.setTarget(target);
@@ -531,14 +530,13 @@ namespace SecondBot.Client {
             // https://github.com/cinderblocks/libremetaverse/blob/e26ae695fed27e43a510a85d786abbac2552d051/Programs/examples/TestClient/Commands/Groups/ActivateGroupCommand.cs
             //string groupName = "泪橋";
 
-            int index = message.IndexOf("グループ");
-            int index2 = message.IndexOf(" ", index);
-            if (index2 == -1) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
                 string mes = "グループ名を指定してください";
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
-            string groupName = message.Substring(index2+1, message.Length - index2-1);
+            string groupName = arr1[arr1.Length-1];
             Console.WriteLine(groupName);
 
             UUID groupUUID = this.mclient.GroupName2UUID(groupName);
@@ -707,14 +705,13 @@ namespace SecondBot.Client {
             animationcommand.list(fromUUID, fromName, message, type);
         }
         void animCommand(UUID fromUUID, string fromName, string message ,int type) {
-            int index = message.IndexOf("アニメ");
-            int index2 = message.IndexOf(" ", index);
-            if (index2 == -1) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
                 string mes = "アニメーション名を指定してください";
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
-            string animName = message.Substring(index2+1, message.Length - index2-1);
+            string animName = arr1[arr1.Length-1];
             animationcommand.play(animName);
         }
         void danceCommand(UUID fromUUID, string fromName, string message ,int type) {
@@ -767,14 +764,13 @@ namespace SecondBot.Client {
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
-            int index = message.IndexOf("attach");
-            int index2 = message.IndexOf(" ", index);
-            if (index2 == -1) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
                 string mes = "アイテム名称を指定してください";
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
-            string itemName = message.Substring(index2+1, message.Length - index2-1);
+            string itemName = arr1[arr1.Length-1];
             Console.WriteLine(itemName);
 
             UUID folderUUID = UUID.Zero;
@@ -826,14 +822,13 @@ namespace SecondBot.Client {
             }
         }
         void detachCommand(UUID fromUUID, string fromName, string message ,int type) {
-            int index = message.IndexOf("detach");
-            int index2 = message.IndexOf(" ", index);
-            if (index2 == -1) {
+            var arr1 = message.Split(' ');
+            if (arr1.Length == 1) {
                 string mes = "アイテム名称を指定してください";
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
-            string itemName = message.Substring(index2+1, message.Length - index2-1);
+            string itemName = arr1[arr1.Length-1];
             Console.WriteLine(itemName);
 
             UUID folderUUID = UUID.Zero;
