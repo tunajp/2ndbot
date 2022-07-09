@@ -49,6 +49,7 @@ namespace SecondBot.Client {
         MeCabIpaDicTagger tagger;
 
         private Dictionary<string, List<string>> commandDic = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> danceDic = new Dictionary<string, List<string>>();
 
         ChatMode chatMode; // 0:指名モード 1:全レス
         ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month) 2:openai
@@ -137,6 +138,148 @@ namespace SecondBot.Client {
             commandDic.Add("appearanceCommand", new List<string>(){"appearance"});
             commandDic.Add("shootCommand", new List<string>(){"shoot"});
             commandDic.Add("debugCommand", new List<string>(){"デバッグ", "debug"});
+
+            danceDic.Add("SPiCa", new List<string>(){"LPB1 SPiCa (bento) v5.3", "spica", "240000"});
+            danceDic.Add("私の時間", new List<string>(){"LPB2 Watashi no Jikan (bento) v5.3", "mytime", "150000"});
+            danceDic.Add("メランコリック", new List<string>(){"LPB3 Melancholic (bento) v5.3", "melan", "250000"});
+            danceDic.Add("だってだってだって", new List<string>(){"LPB4 Datte Datte Datte (bento) v5.3", "datte", "250000"});
+            danceDic.Add("PiNK CAT", new List<string>(){"LPB5 Pink Cat (bento) v5.3m", "pinkcat", "270000"});
+            danceDic.Add("好き！雪！本気マジック", new List<string>(){"LPB6 Suki Yuki Honki Masic (bento) v5.3", "sukiyuki", "220000"});
+            danceDic.Add("ドーナツホール", new List<string>(){"LPB7 Donut Hole (bento) v5.3c", "donut", "230000"});
+            danceDic.Add("Wavefile Full", new List<string>(){"LPB8 Wavefile Full (bento) v5.3", "wave", "270000"});
+            //danceDic.Add("金曜日のおはよう", new List<string>(){"LPB9 Kinyou No Ohayo (bento) v5.3", "", "270000"});
+            //danceDic.Add("Melody Line", new List<string>(){"LPB10 Melody Line (bento) v5.3", "", "230000"});
+            //danceDic.Add("ハジメテノオト", new List<string>(){"LPB11 Hajimete no Oto (bento) v0.6b", "", "200000"});
+            //danceDic.Add("", new List<string>(){"LPB12 Shooting Star (bento) v1.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB13 Retry Rendezvous (bento) v5.6", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB14 Little Parade (bento) v5.6", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB15 Kimiga Sobani (bento) v5.6", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB16 Platinam (bento) v5.6", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB17 Drop Pop Candy (bento) v5.6", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB18 Usotsuki (bento) v5.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB19 Pizzicato Drops (bento) v5.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB20 Heisei Cataclysm (bento) v5.7", "", "");
+            //danceDic.Add("", new List<string>(){"LPB21 Miraikei Innocence (bento) v5.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB22 Storobo Nights (bento) v5.7b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB23 Haruni Ichiban Chikai Machi (bento) v5.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB24 Cyber Thunder Thunder (bento) v5.7b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB25 Mosaic Roll (bento) v5.7b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB26 Haagen-Dazs Ika no Sappuukei (bento) v5.7a", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB27 Dear (bento) v5.7b", "", ""});
+            //danceDic.Add("Hand in Hand", new List<string>(){"LPB28 Hand in Hand (bento) v5.7b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB29 Kotoba no iranai Yakusoku (bento) v5.7b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB30 Last Night Good Night (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB31 Yakimochi no Kotae (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB32 Daybreak Frontline_Left  (bento) v1.7", "", ""}); //LPB32 Daybreak Frontline_Right  (bento) v1.7
+            //danceDic.Add("", new List<string>(){"LPB33 Lolicon de Yokatta~ Full (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB34 Nekomimi Switch (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB35 Jenga (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB36 Tsukimiyo Rabbit v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB37 Yuigadokuson (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB38 Kokuhaku Rival Sengen (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB39 Kyomo Harebare Left (bento) v1.7", "", ""}); // LPB39 Kyomo Harebare Right (bento) v1.7
+            //danceDic.Add("", new List<string>(){"LPB40 Angel Rhythm (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB41 PositiveThinking (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB42 Li Aru Fanclub Left (bento) v1.7", "", ""}); // LPB42 Li Aru Fanclub Right (bento) v1.7
+            //danceDic.Add("", new List<string>(){"LPB43 Gokuraku Jodo (bento) v1.7", "", ""});
+            //danceDic.Add("Strawberry", new List<string>(){"LPB44 Strawberry (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB45 Sweet Magic (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB46 1/6 (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB47 Lamb (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB48 Uchouten Vivace (bento) v1.7b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB49 Relagic fish (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB50 Masked bitcH (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB51 UmiYuri Kaiteitan (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB52 Tajuu Mirai no Quartet (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB53 Scissorhands (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB54 Love Letter (bento) v1.7", "", ""});
+            //danceDic.Add("Classic", new List<string>(){"LPB55 Classic (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB56 Twinkle Days  -L (bento) v1.7", "", ""}); // LPB56 Twinkle Days  -R (bento) v1.7
+            //danceDic.Add("", new List<string>(){"LPB57 Uso to Nuigurumi -L (bento) v1.7", "", ""}); // LPB57 Uso to Nuigurumi -R (bento) v1.7
+            //danceDic.Add("", new List<string>(){"LPB58 Tsumi to Batsu (bento) v1.7", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB59 Junjou Fighter (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB60 Hi-Fi Raver (bento) v2.0", "", ""});
+            //danceDic.Add("トキヲ・ファンカ", new List<string>(){"LPB61 Tokio Funka (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB62 Owari e Mukau Hajimari no Uta (bento) v2.0", ""}, "");
+            //danceDic.Add("", new List<string>(){"LPB63 Fuwari Crayon (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB64 Syalala (bento) v2.0b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB65 Dive to Blue (bento) -L v1.9", "", ""}); // LPB65 Dive to Blue (bento) -R v1.9
+            //danceDic.Add("", new List<string>(){"LPB66 Mabel (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB67 Sadistic Love (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB68 Anti-Gravity (bento) v2.0", "", ""});
+            danceDic.Add("恋愛デコレート", new List<string>(){"LPB69 Ren ai Decorate (bento) v2.0", "deco", "330000"});
+            //danceDic.Add("", new List<string>(){"LPB70 Wakusei Loop (bento) v2.0", "", ""});
+            //danceDic.Add("Mad Lovers", new List<string>(){"LPB71 Mad Lovers (bento) v2.0", "", ""}); // LPB71 Mad Lovers Chair ( Chair only )
+            //danceDic.Add("", new List<string>(){"LPB72 Taiyoukei Disco (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB73 Robo Kiss -L (bento) v2.0", "", ""}); // LPB73 Robo Kiss -R (bento) v2.0
+            //danceDic.Add("", new List<string>(){"LPB74 Shiroi Yukino Princess wa (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB75 Marine Bloomin' (bento) v1.9b", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB76 Musunde Hiraite Rasetsu to Mukuro (bento) v2.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB77 Gigantic O.T.N. (bento) v2.1", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB78 Koi no 2-4-11 (bento) v2.1", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB79 Twinkle World (bento) v2.1", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB80 Yume to Hazakura (bento) v2.1", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB81 Natsu ni Sarishi Kimi o Omof (bento) v2.1", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB82 Liar Dance -Center (bento) v2.1", "", ""}); // LPB82 Liar Dance -Right (bento) v2.1, LPB82 Liar Dance -Left (bento) v2.1
+            //danceDic.Add("", new List<string>(){"LPB83 DoReMiFa Rondo -L (bento) v2.1", "", ""}); // LPB83 DoReMiFa Rondo -R (bento) v2.1
+            //danceDic.Add("", new List<string>(){"LPB84 Girls (bento) v2.1", "", ""});
+            //danceDic.Add("紅一葉", new List<string>(){"LPB85 Akahitoha (bento) v2.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB86 Give me a break Stop now (bento) v2.2", "", ""});
+            //danceDic.Add("ポーカーフェイス", new List<string>(){"LPB87 Poker Face -R (bento) v2.2", "", ""}); // LPB87 Poker Face -L (bento) v2.2, LPB87 Poker Face -RR (bento) v2.2.LPB87 Poker Face -LL (bento) v2.2
+            //danceDic.Add("", new List<string>(){"LPB88 Killer Lady (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB89 Onegai Darling (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB90 Wave (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB91 Heart a la mode (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB92 Calc Piano (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB93 Happy Halloween (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB94 Hybrid (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB95 Koizora Yohou (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB96 Tougen Renka (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB97 Ojyama Mushi  (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB98 Get Up & Move!! (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB99 MiraiDokei AM4:30 (bento) v3.0", "", ""});
+            //danceDic.Add("ZIGG-ZAGG", new List<string>(){"LPB100 Zigg-Zagg (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB101 Shake It Off -L (bento) v3.0", "", ""}); // LPB101 Shake It Off -R (bento) v3.0
+            //danceDic.Add("", new List<string>(){"LPB102 Pusse Cafe (bento) v3.0", "", ""}); // LPB102 Pusse Cafe (bento) v3.0
+            //danceDic.Add("", new List<string>(){"LPB103 Love Letter (bento) v3.0", "", ""});
+            //danceDic.Add("視力検査", new List<string>(){"LPB104 Shiryoku Kensa (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB105 39 (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB106 Beat It (bento) v3.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB107 Asu no Yozora Shoukaihan (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB108 Jinsei Reset Button (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB109 Love Me If You Can - Left (bento) v3.0", "", ""}); // LPB109 Love Me If You Can - Right (bento) v3.0
+            //danceDic.Add("", new List<string>(){"LPB110 Madamamagoto (bento) v3.0", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB111 Suki Suki Zecchou Shou -Center (bento) v3.0", "", ""}); // LPB111 Suki Suki Zecchou Shou -Left (bento) v3.0, LPB111 Suki Suki Zecchou Shou -Right (bento) v3.0
+            //danceDic.Add("", new List<string>(){"LPB112 Happy Happy Birthday (bento) v3.0", "", ""});
+            //danceDic.Add("桃源恋歌", new List<string>(){"LPB113 Tougen Renka 3 -Center (bento) v5.0", "", ""}); // LPB113 Tougen Renka 3  -Right (bento) v5.0, LPB113 Tougen Renka 3 -Left (bento) v5.0
+            //danceDic.Add("", new List<string>(){"LPB114 Gift (bento) v5.5e", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB115 DeepBlueTown he Oideyo (bento) v5.5e", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB116 DeepBlueSong (bento) v5.5e", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB117 [A]ddiction (bento) v5.5e", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB118 Marine Dreamin' (bento) v5.5e", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB119 Glide -L (bento) v5.7b", "", ""}); // LPB119 Glide -R (bento) v5.7b
+            //danceDic.Add("", new List<string>(){"LPB120 Clap Hip Cherry (bento) v5.7a", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB121 Aimaisa Kaihi (bento) v7.2", "", ""});
+            //danceDic.Add("恋はきっと急上昇☆", new List<string>(){"LPB122 Koi wa Kitto Kyuujoushou (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB123 Love Cino (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB124 Tetrodotoxin Sizer Nigou  -L (bento) v7.2", "", ""}); // LPB124 Tetrodotoxin Sizer Nigou  -R (bento) v7.2
+            //danceDic.Add("", new List<string>(){"LPB125 Senbonzakura (bento) v7.2", "", ""}); // LPB125 Senbonzakura Fan (Fan only)
+            //danceDic.Add("", new List<string>(){"LPB126 Gravity=Reality (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB127 Kusari no Shoujo (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB128 Dramaturgy (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB129 The Cure [Short Dance]  (bento) v7.2", "", ""});
+            //danceDic.Add("脱獄", new List<string>(){"LPB130 Datsugoku (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB131 Round off the Square Earth (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB132 Let's try it (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB133 Orange  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB134 Roki  (bento) v7.2", "", ""});
+            //danceDic.Add("シャルル", new List<string>(){"LPB135 Charles  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB136 Sugar hate  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB137 Kimi no kanojo  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB138 Sea Breeze  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB139 Meg meg fire endless night  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB140 Bye-Bye  (bento) v7.2", "", ""});
+            //danceDic.Add("", new List<string>(){"LPB141 Love Mikujen'nu (bento) v7.2", "", ""});
 
             this.mclient = new MyClient();
             this.mclient.Settings.USE_LLSD_LOGIN = true; // LLSD or XML-RPC(古い形式)
@@ -938,12 +1081,23 @@ namespace SecondBot.Client {
         void debugCommand(UUID fromUUID, string fromName, string message ,int type) {
             UUID dir = getInventoryUUID("#LittlePierceDanceSet", this.mclient.Inventory.Store.RootFolder.UUID);
             if (dir != UUID.Zero) {
+                int count = this.danceDic.Count();
+                Random r = new System.Random();
+                int danceNum = r.Next(0, count-1);
+                string key = this.danceDic.Keys.ToList()[danceNum];
+                List<string> nthValue = this.danceDic[key];
+                string danceName = nthValue[0];
+                string danceCommand = nthValue[1];
+                int danceTime = Int32.Parse(nthValue[2]);
+                Console.WriteLine("DanceName:" + danceName + ",DanceCommand:" + danceCommand + ",DanceTime:" + danceTime.ToString());
+
                 Console.WriteLine("attach dir->" + dir.ToString());
-                attach(dir, "LPB69 Ren ai Decorate");
+                attach(dir, danceName);
                 Thread.Sleep(1000 * 10);
-                this.mclient.Say(UUID.Zero, "deco", 0, 0);
-                Thread.Sleep(Convert.ToInt32(1000.0 * 60.0 * 5.5));
-                detach(dir, "LPB69 Ren ai Decorate");
+                this.mclient.Say(UUID.Zero, "聞いてください、" + key, 0, 0);
+                this.mclient.Say(UUID.Zero, danceCommand, 0, 0);
+                Thread.Sleep(danceTime);
+                detach(dir, danceName);
             }
         }
 #endregion
