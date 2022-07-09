@@ -936,6 +936,15 @@ namespace SecondBot.Client {
             this.mclient.Self.Movement.SendUpdate();
         }
         void debugCommand(UUID fromUUID, string fromName, string message ,int type) {
+            UUID dir = getInventoryUUID("#LittlePierceDanceSet", this.mclient.Inventory.Store.RootFolder.UUID);
+            if (dir != UUID.Zero) {
+                Console.WriteLine("attach dir->" + dir.ToString());
+                attach(dir, "LPB69 Ren ai Decorate");
+                Thread.Sleep(1000 * 10);
+                this.mclient.Say(UUID.Zero, "deco", 0, 0);
+                Thread.Sleep(Convert.ToInt32(1000.0 * 60.0 * 5.5));
+                detach(dir, "LPB69 Ren ai Decorate");
+            }
         }
 #endregion
 
@@ -1270,5 +1279,75 @@ namespace SecondBot.Client {
             return Vector3.Zero;
         }
 
+        private UUID getInventoryUUID(string name, UUID panretFolderUUID/*=this.mclient.Inventory.Store.RootFolder.UUID*/) {
+            UUID folderUUID = UUID.Zero;
+            List<InventoryBase> contents = this.mclient.Inventory.Store.GetContents(panretFolderUUID);
+            if (contents != null) {
+                foreach (InventoryBase i in contents) {
+                    if (i.Name == name) {
+                        folderUUID = i.UUID;
+                        Console.WriteLine("Object found:" + name + "," + folderUUID.ToString());
+                        return folderUUID;
+                        //break;
+                    }
+                    if (i is InventoryFolder folder) {
+                        folderUUID = getInventoryUUID(name, i.UUID);
+                        if (folderUUID != UUID.Zero) return folderUUID;
+                    }
+                }
+            } else {
+                Console.WriteLine("Objects folder not found");
+            }
+
+            return folderUUID;
+        }
+
+        private void attach(UUID folderUUID, string itemName) {
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            List<InventoryItem> items = new List<InventoryItem>();
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "Objects");
+                return;
+            }
+            foreach (InventoryBase item in contents)
+            {
+                if (item is InventoryItem inventoryItem) {
+                    items.Add(inventoryItem);
+                    if (inventoryItem.Name.Contains(itemName)) {
+                        this.mclient.Appearance.Attach(inventoryItem, AttachmentPoint.AltLeftEar);
+                        Console.WriteLine("attach->" + inventoryItem.Name + "," + inventoryItem.UUID.ToString());
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void detach(UUID folderUUID, string itemName) {
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            List<InventoryItem> items = new List<InventoryItem>();
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "Objects");
+                return;
+            }
+            foreach (InventoryBase item in contents)
+            {
+                if (item is InventoryItem inventoryItem) {
+                    items.Add(inventoryItem);
+                    if (inventoryItem.Name.Contains(itemName)) {
+                        this.mclient.Appearance.Detach(inventoryItem);
+                        Console.WriteLine("detach->" + inventoryItem.Name + "," + inventoryItem.UUID.ToString());
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
