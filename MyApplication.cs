@@ -28,6 +28,7 @@ namespace SecondBot.Client {
         private bool randomChat;
 
         private bool loiter;
+        private bool dancing;
         private DateTime lastLoiterDateTime;
         private Vector3 loiterStartRegionPos;
         static public DateTime lastChatDateTime;
@@ -85,6 +86,7 @@ namespace SecondBot.Client {
             this.followTarget = null;
             this.randomChat = true;
             this.loiter = false;
+            this.dancing = false;
             this.lastLoiterDateTime = DateTime.Now;
             MyApplication.lastChatDateTime = DateTime.Now;
 
@@ -405,6 +407,10 @@ namespace SecondBot.Client {
                     Console.WriteLine("Ignore this as it is not a chat from agent.");
                     return;
                 }
+                if (e.FromName.Contains("LPB")) {
+                    Console.WriteLine("Ignore this as it is LPB Dance System.");
+                    return;
+                }
                 string message = e.Message;
                 message = message.Trim();
 
@@ -473,6 +479,7 @@ namespace SecondBot.Client {
             switch (e.IM.Dialog) {
                 case InstantMessageDialog.RequestTeleport:
                     this.loiter = false;
+                    this.stopDance();
                     Console.WriteLine("Accepting teleport lure:" + e.IM.FromAgentName);
                     standupcommand.setCurrentAnims(this.currentAnims);
                     standupcommand.Execute(e.IM.FromAgentID, e.IM.FromAgentName, message, 1);
@@ -628,6 +635,7 @@ namespace SecondBot.Client {
         }
         void followCommand(UUID fromUUID, string fromName, string message ,int type) {
             this.loiter = false;
+            this.stopDance();
             this.mclient.Self.AutoPilotCancel();
             standupcommand.setCurrentAnims(this.currentAnims);
             standupcommand.Execute(fromUUID, fromName, message, type);
@@ -639,12 +647,16 @@ namespace SecondBot.Client {
         void stopCommand(UUID fromUUID, string fromName, string message ,int type) {
             followTarget = null;
             this.loiter = false;
+            this.stopDance();
+            this.dancing = false;
             standupcommand.setCurrentAnims(this.currentAnims);
             standupcommand.Execute(fromUUID, fromName, message, type);
             this.mclient.Self.AutoPilotCancel();
         }
         void teleportCommand(UUID fromUUID, string fromName, string message ,int type) {
             this.loiter = false;
+            this.stopDance();
+            this.dancing = false;
             var arr1 = message.Split(' ');
             if (arr1.Length == 1) {
                 string mes = "宛先をsim名/x/y/zで指定してください";
@@ -666,6 +678,8 @@ namespace SecondBot.Client {
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
+            this.loiter = false;
+            this.stopDance();
             this.mclient.Network.Logout();
         }
         void groupCommand(UUID fromUUID, string fromName, string message ,int type) {
@@ -702,6 +716,8 @@ namespace SecondBot.Client {
         }
         void gotoHomeCommand(UUID fromUUID, string fromName, string message ,int type) {
             this.loiter = false;
+            this.stopDance();
+            this.dancing = false;
             string mes = "お家へ帰りまーす！";
             if (String.IsNullOrEmpty(this.home)) {
                 mes = "お家がありません・・・";
@@ -859,10 +875,11 @@ namespace SecondBot.Client {
             animationcommand.play(animName);
         }
         void danceCommand(UUID fromUUID, string fromName, string message ,int type) {
-            Random r = new System.Random();
-            int next = r.Next(1, 7);
-            string danceanim = "DANCE" + next.ToString();
-            animationcommand.play(danceanim);
+            //Random r = new System.Random();
+            //int next = r.Next(1, 7);
+            //string danceanim = "DANCE" + next.ToString();
+            //animationcommand.play(danceanim);
+            this.randomDance();
         }
         async void secondLifeCommand(UUID fromUUID, string fromName, string message ,int type) {
             this.mclient.Say(fromUUID, await SecondLifeFeedCommand.feed(), 0, type);
@@ -1080,6 +1097,10 @@ namespace SecondBot.Client {
             this.mclient.Self.Movement.SendUpdate();
         }
         void debugCommand(UUID fromUUID, string fromName, string message ,int type) {
+            this.randomDance();
+        }
+#endregion
+        private void randomDance() {
             UUID dir = getInventoryUUID("#LittlePierceDanceSet", this.mclient.Inventory.Store.RootFolder.UUID);
             if (dir != UUID.Zero) {
                 int count = this.danceDic.Count();
@@ -1092,6 +1113,7 @@ namespace SecondBot.Client {
                 int danceTime = Int32.Parse(nthValue[2]);
                 Console.WriteLine("DanceName:" + danceName + ",DanceCommand:" + danceCommand + ",DanceTime:" + danceTime.ToString());
 
+                this.dancing = true;
                 Console.WriteLine("attach dir->" + dir.ToString());
                 attach(dir, danceName);
                 Thread.Sleep(1000 * 10);
@@ -1100,10 +1122,17 @@ namespace SecondBot.Client {
                 Thread.Sleep(danceTime);
                 detach(dir, danceName);
                 standupcommand.setCurrentAnims(this.currentAnims);
-                standupcommand.Execute(fromUUID, fromName, message, type);
+                standupcommand.Execute(UUID.Zero, "", "", 0);
+                this.dancing = false;
             }
         }
-#endregion
+
+        private void stopDance() {
+            UUID dir = getInventoryUUID("#LittlePierceDanceSet", this.mclient.Inventory.Store.RootFolder.UUID);
+            if (dir != UUID.Zero) {
+                allDetach(dir);
+            }
+        }
 
         private Primitive? getNextPrim() {
             if (this.MovementTargetPrims == null) return null;
@@ -1168,16 +1197,16 @@ namespace SecondBot.Client {
                 }
             }
 
-            if (this.loiter == true) {
+            if (this.loiter == true && dancing == false) {
 
                 TimeSpan d = DateTime.Now - this.lastLoiterDateTime;
                 if (d.TotalSeconds > Constants.LOITER_TIMER) {
                     Random r = new System.Random();
-                    int nextAction = r.Next(0, 3); // 0-2
+                    int nextAction = r.Next(0, 10); // 0-9
                     standupcommand.setCurrentAnims(this.currentAnims);
                     standupcommand.Execute(UUID.Zero, "", "", 0);
 
-                    if (nextAction != 0) {
+                    if (nextAction < 4) {
                         Console.WriteLine("開始場所:" + this.loiterStartRegionPos.X + "," + this.loiterStartRegionPos.Y);
                         int targetX = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
                         int targetY = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
@@ -1200,7 +1229,7 @@ namespace SecondBot.Client {
                             this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
                             break;
                         }
-                    } else {
+                    } else if (nextAction < 7 ) {
                         this.findRandomObject();
                         Primitive? targetPrim = this.getNextPrim();
                         if (targetPrim != null) {
@@ -1210,6 +1239,12 @@ namespace SecondBot.Client {
                             this.mclient.Self.Sit();
                         }
 
+                    } else {
+                        string target = this.mclient.Network.CurrentSim.Name.ToString() + "/" + this.loiterStartRegionPos.X + "/" + this.loiterStartRegionPos.Y + "/" + this.loiterStartRegionPos.Z;
+                        //this.mclient.Say(UUID.Zero, target, 0, 0);
+                        teleportcommand.setTarget(target);
+                        teleportcommand.Execute(UUID.Zero, "", "", 0);
+                        this.randomDance();
                     }
 
                     this.lastLoiterDateTime = DateTime.Now;
@@ -1503,6 +1538,26 @@ namespace SecondBot.Client {
                         Console.WriteLine("detach->" + inventoryItem.Name + "," + inventoryItem.UUID.ToString());
                         break;
                     }
+                }
+            }
+        }
+
+        private void allDetach(UUID folderUUID) {
+            InventoryFolder folder = (InventoryFolder)this.mclient.Inventory.Store[folderUUID];
+            this.mclient.Inventory.RequestFolderContents(folder.UUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByDate | InventorySortOrder.FoldersByName);
+
+            ItemEvent.WaitOne(30000, false);
+            List<InventoryBase> contents =  this.mclient.Inventory.FolderContents(folderUUID, this.mclient.Self.AgentID, true, true, InventorySortOrder.ByName, 20 * 1000);
+            List<InventoryItem> items = new List<InventoryItem>();
+            if (contents == null) {
+                Console.WriteLine("Failed to get contents of " + "Objects");
+                return;
+            }
+            foreach (InventoryBase item in contents)
+            {
+                if (item is InventoryItem inventoryItem) {
+                    items.Add(inventoryItem);
+                    this.mclient.Appearance.Detach(inventoryItem);
                 }
             }
         }
