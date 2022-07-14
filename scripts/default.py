@@ -124,7 +124,7 @@ def openaiPrompt(fromUUID, fromName, message, type):
     prompt += "私:こんにちは、調子はどう？\n"
     prompt += "AI:" + fromName + "さんこんにちは、ボクは元気だよ (I'm fine.)\n"
     prompt += "私:好きだよ\n"
-    prompt += "AI:ボクも" + fromName + "んのことが好きだよ (I love you " + fromName + "too !)\n"
+    prompt += "AI:ボクも" + fromName + "さんのことが好きだよ (I love you " + fromName + "too !)\n"
     prompt += "私:この服どう思いますか？\n"
     prompt += "AI:素敵な服だね！ (What a lovely outfit.)\n"
 
