@@ -1206,7 +1206,7 @@ namespace SecondBot.Client {
                     standupcommand.setCurrentAnims(this.currentAnims);
                     standupcommand.Execute(UUID.Zero, "", "", 0);
 
-                    if (nextAction < 4) {
+                    if (nextAction < 5) {
                         Console.WriteLine("開始場所:" + this.loiterStartRegionPos.X + "," + this.loiterStartRegionPos.Y);
                         int targetX = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
                         int targetY = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
@@ -1229,7 +1229,7 @@ namespace SecondBot.Client {
                             this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
                             break;
                         }
-                    } else if (nextAction < 7 ) {
+                    } else if (nextAction < 8 ) {
                         this.findRandomObject();
                         Primitive? targetPrim = this.getNextPrim();
                         if (targetPrim != null) {
