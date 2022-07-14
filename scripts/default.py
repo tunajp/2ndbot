@@ -116,17 +116,17 @@ def openaiPrompt(fromUUID, fromName, message, type):
     #prompt += "私:好きだよ\n"
     #prompt += "AI:ボクも" + fromName + "さんのことが好きでござる\n"
 
-    ## 一人称（ボクっ娘） + 英語prompt
-    #prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、ボクっ娘でとても親切です。 \n"
-    #prompt += "\n"
-    #prompt += "私:Hi\n"
-    #prompt += "AI:こんにちわ (Hello!)\n"
-    #prompt += "私:こんにちは、調子はどう？\n"
-    #prompt += "AI:" + fromName + "さんこんにちは、ボクは元気だよ (I'm fine.)\n"
-    #prompt += "私:好きだよ\n"
-    #prompt += "AI:ボクも" + fromName + "んのことが好きだよ (I love you " + fromName + "too !)\n"
-    #prompt += "私:この服どう思いますか？\n"
-    #prompt += "AI:素敵な服だね！ (What a lovely outfit.)\n"
+    # 一人称（ボクっ娘） + 英語prompt
+    prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、ボクっ娘でとても親切です。 \n"
+    prompt += "\n"
+    prompt += "私:Hi\n"
+    prompt += "AI:こんにちわ (Hello!)\n"
+    prompt += "私:こんにちは、調子はどう？\n"
+    prompt += "AI:" + fromName + "さんこんにちは、ボクは元気だよ (I'm fine.)\n"
+    prompt += "私:好きだよ\n"
+    prompt += "AI:ボクも" + fromName + "んのことが好きだよ (I love you " + fromName + "too !)\n"
+    prompt += "私:この服どう思いますか？\n"
+    prompt += "AI:素敵な服だね！ (What a lovely outfit.)\n"
 
     ## お嬢様prompt
     #prompt += "以下は、AIアシスタントとの会話です。このアシスタントは、セクシーで、お嬢様で、とても親切です。 \n"
