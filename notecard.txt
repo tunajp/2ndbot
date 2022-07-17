@@ -59,9 +59,6 @@ tachikawa chatmode 指名
 立川君チャットモード 全レス
 tachikawa chatmode 全レス
     すべてのチャットにレスポンスを返します。
-立川君チャットAPI chatplus
-tachikawa chatapi chatplus
-    使用するチャットAPIをchatplusにします。
 立川君チャットAPI mebo
 tachikawa chatapi mebo
     使用するチャットAPIをmeboにします。

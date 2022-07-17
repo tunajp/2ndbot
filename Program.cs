@@ -29,8 +29,6 @@ namespace SecondBot.Client {
                     }
                     String? home = bot.Element("home")?.Value;
                     String? bed = bot.Element("bed")?.Value;
-                    String? chatplus_apikey = bot.Element("chatplus_apikey")?.Value;
-                    String? chatplus_agentname = bot.Element("chatplus_agentname")?.Value;
                     String? mebo_apikey = bot.Element("mebo_apikey")?.Value;
                     String? mebo_agent_id = bot.Element("mebo_agent_id")?.Value;
                     String? openai_apikey = bot.Element("openai_apikey")?.Value;
@@ -40,18 +38,16 @@ namespace SecondBot.Client {
                         || lastname == null || lastname.Length == 0
                         || password == null || password.Length == 0
                         || nicknames.Count == 0
-                        || chatplus_apikey == null || chatplus_apikey.Length == 0
-                        || chatplus_agentname == null || chatplus_agentname.Length == 0
                         || owner == null || owner.Length == 0
                         ) {
-                        Console.WriteLine("Required fields are not set(fistname,lastname,password,nickname,chatplus_apikey,chatplus_agentname,owner in .settings.xml)");
+                        Console.WriteLine("Required fields are not set(fistname,lastname,password,nickname,owner in .settings.xml)");
                         Environment.Exit(0);
                         return;
                     }
                     if (start == null) start = "last";
 
                     Console.WriteLine(fistname + " " + lastname + " " + nicknames[0] +" ...starting");
-                    apps.Add(new MyApplication(fistname, lastname, password, start, nicknames, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, openai_apikey, script,owner));
+                    apps.Add(new MyApplication(fistname, lastname, password, start, nicknames, home, bed, mebo_apikey, mebo_agent_id, openai_apikey, script,owner));
                     // アプリケーション数が0になったら終了する
                     myAppCount += 1;
                 }

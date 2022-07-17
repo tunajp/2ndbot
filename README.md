@@ -6,8 +6,6 @@ using libremetaverse
 
 Chat API
 
-https://www.chaplus.jp/
-
 https://mebo.work/
 
 https://openai.com/

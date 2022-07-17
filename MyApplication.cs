@@ -13,8 +13,7 @@ namespace SecondBot.Client {
         All,
     }
     public enum ChatApi {
-        chatplus = 0,
-        mebo,
+        mebo = 0,
         openai,
     }
     public class MyApplication {
@@ -39,8 +38,6 @@ namespace SecondBot.Client {
         List<string> nicknames;
         string? home;
         string? bed;
-        string chatplus_apikey;
-        string chatplus_agentname;
         string? mebo_apikey;
         string? mebo_agent_id;
         string? openai_apikey;
@@ -53,7 +50,7 @@ namespace SecondBot.Client {
         private Dictionary<string, List<string>> danceDic = new Dictionary<string, List<string>>();
 
         ChatMode chatMode; // 0:指名モード 1:全レス
-        ChatApi chatApi; // 0:chatplus 1:mebo(free plan:1000/month) 2:openai
+        ChatApi chatApi; // 0:mebo(free plan:1000/month) 1:openai
         private ManualResetEvent GroupsEvent = new ManualResetEvent(false);
 
         private ManualResetEvent ItemEvent = new ManualResetEvent(false);
@@ -74,14 +71,13 @@ namespace SecondBot.Client {
         private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
         private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
 
-        public MyApplication(string firstname, string lastname, string pass, string start, List<string> nicknames, string? home,string? bed, string chatplus_apikey, string chatplus_agentname, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? script, string owner) {
+        public MyApplication(string firstname, string lastname, string pass, string start, List<string> nicknames, string? home,string? bed, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? script, string owner) {
 
             AssemblyLoadContext.Default.Unloading += MethodInvokedOnSigTerm;
 
             this.logger = new Logger(firstname + "_" + lastname);
 
             this.chatMode = ChatMode.Nominate;
-            this.chatApi = ChatApi.chatplus;
             this.currentAnims = new List<UUID>();
             this.followTarget = null;
             this.randomChat = true;
@@ -93,8 +89,6 @@ namespace SecondBot.Client {
             this.nicknames = nicknames;
             this.home = home;
             this.bed = bed;
-            this.chatplus_apikey = chatplus_apikey;
-            this.chatplus_agentname = chatplus_agentname;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;
             this.openai_apikey = openai_apikey;
@@ -468,7 +462,7 @@ namespace SecondBot.Client {
                             dynamic openaiPrompt = this.scriptScope.GetVariable(@"openaiPrompt");
                             string prompt = openaiPrompt(e.SourceID, e.FromName, message, 0);
 
-                            idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
+                            idletalkcommand.setKeys(this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
                             idletalkcommand.Execute(e.SourceID, e.FromName, message, 0);
                         } catch(Exception ex) {
                             Console.WriteLine(ex.Message);
@@ -533,7 +527,7 @@ namespace SecondBot.Client {
                     dynamic openaiPrompt = this.scriptScope.GetVariable(@"openaiPrompt");
                     string prompt = openaiPrompt(fromUUID, fromName, message, type);
 
-                    idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
+                    idletalkcommand.setKeys(this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
                     idletalkcommand.Execute(fromUUID, fromName, message, type);
                 } catch(Exception e) {
                     Console.WriteLine(e.Message);
@@ -760,10 +754,7 @@ namespace SecondBot.Client {
         }
         void chatApiCommand(UUID fromUUID, string fromName, string message ,int type) {
             string mes = "";
-            if (message.Contains("chatplus")) {
-                this.chatApi = ChatApi.chatplus;
-                mes = "チャットAPIをchatplusに変更しました。会話のドッジボールをお楽しみください。";
-            } else if (message.Contains("mebo")) {
+            if (message.Contains("mebo")) {
                 this.chatApi = ChatApi.mebo;
                 mes = "チャットAPIをmeboに変更しました。会話のラリーをお楽しみください。";
             } else if (message.Contains("openai")) {
@@ -1177,10 +1168,7 @@ namespace SecondBot.Client {
                 if (d.TotalSeconds > Constants.RANDOM_CHAT_TIMER) {
                     Console.WriteLine("ランダムな発言");
                     Random r = new System.Random();
-                    int max = 4; // 0-3
-                    if (this.chatApi == ChatApi.openai) {
-                        max = 2; // 0-1
-                    }
+                    int max = 2; // 0-1
                     int nextAction = r.Next(0, max);
                     if (nextAction == 0) {
                         int ramdomGestureNum = r.Next(0, 10); // 0-9
@@ -1194,9 +1182,6 @@ namespace SecondBot.Client {
                         }
                     } else if (nextAction == 1) {
                         idletalkcommand.rondomMessage();
-                    } else {
-                        idletalkcommand.setKeys(this.chatApi, this.chatplus_apikey, this.chatplus_agentname, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, "");
-                        idletalkcommand.Execute(UUID.Zero, "", Constants.RANDOM_CHAT_SEED_MESSAGE, 0);
                     }
                 }
             }
