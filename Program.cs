@@ -5,9 +5,12 @@ namespace SecondBot.Client {
     public class Program {
 
         public static int myAppCount = 0;
+        public static List<MyApplication> apps = new List<MyApplication>();
 
         static void Main(string[] args) {
             Console.WriteLine("2ndBot Start");
+
+            Console.CancelKeyPress += Console_CancelKeyPress;
 
             try {
                 XElement xml = XElement.Load(Constants.SETTING_XML_FILENAME);
@@ -48,7 +51,7 @@ namespace SecondBot.Client {
                     if (start == null) start = "last";
 
                     Console.WriteLine(fistname + " " + lastname + " " + nicknames[0] +" ...starting");
-                    new MyApplication(fistname, lastname, password, start, nicknames, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, openai_apikey, script,owner);
+                    apps.Add(new MyApplication(fistname, lastname, password, start, nicknames, home, bed, chatplus_apikey, chatplus_agentname, mebo_apikey, mebo_agent_id, openai_apikey, script,owner));
                     // アプリケーション数が0になったら終了する
                     myAppCount += 1;
                 }
@@ -62,6 +65,18 @@ namespace SecondBot.Client {
             {
                 manualResetEvent.WaitOne();
             }
+        }
+
+        static void Console_CancelKeyPress(Object? sender, ConsoleCancelEventArgs e) {
+            Console.WriteLine("Ctrl+C");
+            foreach(var app in apps) {
+                try {
+                    app.exitApp();
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            e.Cancel = true;
         }
     }
 }

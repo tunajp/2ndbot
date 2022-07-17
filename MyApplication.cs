@@ -350,6 +350,12 @@ namespace SecondBot.Client {
             }
         }
 
+        public void exitApp() {
+            this.loiter = false;
+            this.stopDance();
+            this.mclient.Network.Logout();
+        }
+
         void MethodInvokedOnSigTerm(AssemblyLoadContext sender) {
             Console.WriteLine("SIGHUP");
         }
@@ -678,9 +684,7 @@ namespace SecondBot.Client {
                 this.mclient.Say(fromUUID, mes, 0, type);
                 return;
             }
-            this.loiter = false;
-            this.stopDance();
-            this.mclient.Network.Logout();
+            this.exitApp();
         }
         void groupCommand(UUID fromUUID, string fromName, string message ,int type) {
             // グループタグに関係しそうなとこ
