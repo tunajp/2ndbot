@@ -40,7 +40,7 @@ namespace SecondBot.Client {
             this.mclient = mclient;
             this.chatApi = ChatApi.mebo;
         }
-        public void setKeys(string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string openai_prompt) {
+        public void setKeys(ChatApi chatApi,string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string openai_prompt) {
             this.chatApi = chatApi;
             this.mebo_apikey = mebo_apikey;
             this.mebo_agent_id = mebo_agent_id;

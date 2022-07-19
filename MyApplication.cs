@@ -78,6 +78,7 @@ namespace SecondBot.Client {
             this.logger = new Logger(firstname + "_" + lastname);
 
             this.chatMode = ChatMode.Nominate;
+            this.chatApi = ChatApi.mebo;
             this.currentAnims = new List<UUID>();
             this.followTarget = null;
             this.randomChat = true;
@@ -462,7 +463,7 @@ namespace SecondBot.Client {
                             dynamic openaiPrompt = this.scriptScope.GetVariable(@"openaiPrompt");
                             string prompt = openaiPrompt(e.SourceID, e.FromName, message, 0);
 
-                            idletalkcommand.setKeys(this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
+                            idletalkcommand.setKeys(this.chatApi, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
                             idletalkcommand.Execute(e.SourceID, e.FromName, message, 0);
                         } catch(Exception ex) {
                             Console.WriteLine(ex.Message);
@@ -527,7 +528,7 @@ namespace SecondBot.Client {
                     dynamic openaiPrompt = this.scriptScope.GetVariable(@"openaiPrompt");
                     string prompt = openaiPrompt(fromUUID, fromName, message, type);
 
-                    idletalkcommand.setKeys(this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
+                    idletalkcommand.setKeys(this.chatApi, this.mebo_apikey, this.mebo_agent_id, this.openai_apikey, prompt);
                     idletalkcommand.Execute(fromUUID, fromName, message, type);
                 } catch(Exception e) {
                     Console.WriteLine(e.Message);
