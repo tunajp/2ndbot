@@ -2,6 +2,7 @@ using OpenMetaverse;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Xml.Linq;
+using NMeCab.Specialized;
 
 namespace SecondBot.Client {
 
@@ -164,11 +165,35 @@ namespace SecondBot.Client {
                 foreach (var item in this.openai_dic) {
                     if (item.Key == fromUUID) {
                         foreach(var item2 in item.Value) {
-                            if (prompt.Contains(item2[1])) { // 同じ回答があった場合は、その回答に集約されてしまうため飛ばす
+                            // 同じ回答があった場合は、その回答に集約されてしまうため飛ばす
+                            if (prompt.Contains(item2[1])) {
                                 Console.WriteLine("skipped:"+item2[0]);
                                 Console.WriteLine("skipped:"+item2[1]);
                                 continue;
                             }
+
+                            // ボクは、ボクは・・・みたいに同じ単語を繰り返してる場合は、さらに繰り返しが増えてしまうため飛ばす
+                            MeCabIpaDicTagger tagger;
+                            tagger = MeCabIpaDicTagger.Create();
+                            var nodes = tagger.Parse(item2[1]);
+                            List<string> string_nodes = new List<string>();
+                            foreach (var node in nodes) {
+                                if (node.PartsOfSpeech == "助詞") continue;
+                                if (node.Surface == "、" || node.Surface == "。") continue;
+                                string_nodes.Add(node.Surface);
+                            }
+                            //Console.WriteLine("nodes:" + String.Join(", ", string_nodes));
+                            var duplicates = string_nodes.GroupBy(x => x)
+                                .Where(g => g.Count() > 1)
+                                .Select(y => y.Key)
+                                .ToList();
+                            //Console.WriteLine("duplicates:" + String.Join(", ", duplicates));
+                            if (duplicates.Count > 0) {
+                                Console.WriteLine("skipped:"+item2[0]);
+                                Console.WriteLine("skipped:"+item2[1]);
+                                continue;
+                            }
+
                             prompt += "私:"+item2[0] + "\n";
                             prompt += "AI:"+item2[1] + "\n";
                         }
