@@ -1192,11 +1192,11 @@ namespace SecondBot.Client {
                 TimeSpan d = DateTime.Now - this.lastLoiterDateTime;
                 if (d.TotalSeconds > Constants.LOITER_TIMER) {
                     Random r = new System.Random();
-                    int nextAction = r.Next(0, 10); // 0-9
+                    int nextAction = r.Next(0, 20); // 0-19
                     standupcommand.setCurrentAnims(this.currentAnims);
                     standupcommand.Execute(UUID.Zero, "", "", 0);
 
-                    if (nextAction < 5) {
+                    if (nextAction < 8) { // move
                         Console.WriteLine("開始場所:" + this.loiterStartRegionPos.X + "," + this.loiterStartRegionPos.Y);
                         int targetX = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
                         int targetY = r.Next(Constants.LOITER_RADIUS*-1, Constants.LOITER_RADIUS);
@@ -1219,7 +1219,7 @@ namespace SecondBot.Client {
                             this.mclient.Self.AutoPilot(xTarget, yTarget, zTarget);
                             break;
                         }
-                    } else if (nextAction < 8 ) {
+                    } else if (nextAction < 12 ) { // sit
                         this.findRandomObject();
                         Primitive? targetPrim = this.getNextPrim();
                         if (targetPrim != null) {
@@ -1229,12 +1229,14 @@ namespace SecondBot.Client {
                             this.mclient.Self.Sit();
                         }
 
-                    } else {
+                    } else if (nextAction < 13 ) { // dance
                         string target = this.mclient.Network.CurrentSim.Name.ToString() + "/" + this.loiterStartRegionPos.X + "/" + this.loiterStartRegionPos.Y + "/" + this.loiterStartRegionPos.Z;
                         //this.mclient.Say(UUID.Zero, target, 0, 0);
                         teleportcommand.setTarget(target);
                         teleportcommand.Execute(UUID.Zero, "", "", 0);
                         this.randomDance();
+                    } else { // nothing
+
                     }
 
                     this.lastLoiterDateTime = DateTime.Now;
