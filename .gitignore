@@ -2,5 +2,6 @@
 bin
 obj
 log
+openai_images
 .settings.xml
 openmetaverse_data

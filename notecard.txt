@@ -90,6 +90,13 @@ tachikawa dance
 tachikawa button click チャンネル番号 インデックス ボタン名 オブジェクトID
     オブジェクトに座ったとき等に表示されるスクリプトダイアログのボタンをクリックします。
 
+立川くん〇〇画像ください
+立川くん〇〇画像をください
+    お題に沿った画像を渡します。〇〇の部分は英語で入力します。
+    参考資料
+    https://dallery.gallery/the-dalle-2-prompt-book/
+    https://blog.ch3cooh.jp/entry/2022/08/06/124100
+
 ■その他問い合わせ先等
 In world:tunakan Manga
 GitHub:https://github.com/tunajp/2ndbot

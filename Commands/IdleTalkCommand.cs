@@ -142,6 +142,9 @@ namespace SecondBot.Client {
 
             if (this.openai_apikey == null || this.openai_apikey.Length == 0) {
                 this.mclient.Say(fromUUID, "openai_apikey null", 0, type);
+
+                this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+                this.mclient.Self.AnimationStop(Animations.TYPE, false);
                 return;
             }
 

@@ -67,6 +67,7 @@ namespace SecondBot.Client {
         private AnimationCommand animationcommand;
         private CreateNotecardCommand createnotecardcommand;
         private InventoryListCommand inventorylistcommand;
+        private OpenAIImageCommand openaiImagecommand;
 
         private Microsoft.Scripting.Hosting.ScriptEngine scriptEngine;
         private Microsoft.Scripting.Hosting.ScriptScope scriptScope;
@@ -134,6 +135,7 @@ namespace SecondBot.Client {
             commandDic.Add("inventoryCommand", new List<string>(){"インベントリ表示", "inventory"});
             commandDic.Add("appearanceCommand", new List<string>(){"appearance"});
             commandDic.Add("shootCommand", new List<string>(){"shoot"});
+            commandDic.Add("imageCommand", new List<string>(){"画像ください", "画像をください"});
             commandDic.Add("debugCommand", new List<string>(){"デバッグ", "debug"});
 
             // https://maps.secondlife.com/secondlife/Primary/151/69/22
@@ -324,6 +326,7 @@ namespace SecondBot.Client {
             this.animationcommand = new AnimationCommand(this.mclient);
             this.createnotecardcommand = new CreateNotecardCommand(this.mclient);
             this.inventorylistcommand = new InventoryListCommand(this.mclient);
+            this.openaiImagecommand = new OpenAIImageCommand(this.mclient);
 
             this.scriptEngine = IronPython.Hosting.Python.CreateEngine();
             this.scriptScope = scriptEngine.CreateScope();
@@ -1091,6 +1094,10 @@ namespace SecondBot.Client {
             this.mclient.Self.Movement.MLButtonUp = false;
             this.mclient.Self.Movement.FinishAnim = false;
             this.mclient.Self.Movement.SendUpdate();
+        }
+        void imageCommand(UUID fromUUID, string fromName, string message, int type) {
+            openaiImagecommand.setKeys(this.openai_apikey);
+            openaiImagecommand.Execute(fromUUID, fromName, message, type);
         }
         void debugCommand(UUID fromUUID, string fromName, string message ,int type) {
             this.randomDance();
