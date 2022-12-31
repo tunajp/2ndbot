@@ -204,13 +204,13 @@ namespace SecondBot.Client {
                 prompt += "AI:";
                 Console.WriteLine(prompt);
 
-                var completionResult = await openAiService.Completions.Create(new OpenAI.GPT3.Models.RequestModels.CompletionCreateRequest() {
+                var completionResult = await openAiService.Completions.Create(new OpenAI.GPT3.ObjectModels.RequestModels.CompletionCreateRequest() {
                     Prompt = prompt,
                     MaxTokens = 120,
                     Echo = false,
                     Temperature = 0.7f,
                     Stop = "\n",
-                }, OpenAI.GPT3.Models.Engines.Engine.Curie);
+                }, OpenAI.GPT3.ObjectModels.Models.Model.TextDavinciV3);
                 if (completionResult.Successful) {
                     Console.WriteLine();
                     string answer = completionResult.Choices.FirstOrDefault().Text;
