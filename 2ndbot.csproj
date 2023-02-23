@@ -13,7 +13,7 @@
     <PackageReference Include="GalMoji" Version="0.0.1" />
     <PackageReference Include="IronPython" Version="3.4.0" />
     <PackageReference Include="LibNMeCab.IpaDicBin" Version="0.10.0" />
-    <PackageReference Include="LibreMetaverse" Version="2.0.5.536" />
+    <PackageReference Include="LibreMetaverse" Version="2.0.9.562" />
   </ItemGroup>
 
 </Project>
