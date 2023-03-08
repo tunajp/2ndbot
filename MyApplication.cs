@@ -15,6 +15,7 @@ namespace SecondBot.Client {
     public enum ChatApi {
         mebo = 0,
         openai,
+        chatgpt,
     }
     public class MyApplication {
         MyClient mclient;
@@ -50,7 +51,7 @@ namespace SecondBot.Client {
         private Dictionary<string, List<string>> danceDic = new Dictionary<string, List<string>>();
 
         ChatMode chatMode; // 0:指名モード 1:全レス
-        ChatApi chatApi; // 0:mebo(free plan:1000/month) 1:openai
+        ChatApi chatApi; // 0:mebo(free plan:1000/month) 1:openai 2:chatgpt
         private ManualResetEvent GroupsEvent = new ManualResetEvent(false);
 
         private ManualResetEvent ItemEvent = new ManualResetEvent(false);
@@ -764,6 +765,9 @@ namespace SecondBot.Client {
             } else if (message.Contains("openai")) {
                 this.chatApi = ChatApi.openai;
                 mes = "チャットAPIをOpenAIに変更しました。イーロン・マスクをお楽しみください。";
+            } else if (message.Contains("chatgpt")) {
+                this.chatApi = ChatApi.chatgpt;
+                mes = "チャットAPIをChatGPTに変更しました。無謀な会話をお楽しみください。";
             }
             this.mclient.Say(fromUUID, mes, 0, type);
         }

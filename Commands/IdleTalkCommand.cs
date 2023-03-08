@@ -29,7 +29,7 @@ namespace SecondBot.Client {
 
     public class IdleTalkCommand : Command {
 
-        ChatApi chatApi; // 0:mebo(free plan:1000/month), 1:OpenAI
+        ChatApi chatApi; // 0:mebo(free plan:1000/month), 1:OpenAI, 2:ChatGPT
         private string? mebo_apikey;
         private string? mebo_agent_id;
 
@@ -65,7 +65,7 @@ namespace SecondBot.Client {
             if (message.Contains("User not online")) {
                 return;
             }
-            if (this.chatApi != ChatApi.openai) {
+            if (this.chatApi == ChatApi.mebo) {
                 if (!this.IsJapanese(message) && message.Distinct().Count() != 1) { // wwは英語と判定させない
                     string mes = @"Hello, my name is Tachikawa-kun, and I'm a BOT. I am currently unable to understand English. But I am sure that my dream of speaking in English will come true in the near future. I would appreciate it if you could wait for me until then.";
                     this.mclient.Say(fromUUID, mes, 0, type);
@@ -85,6 +85,7 @@ namespace SecondBot.Client {
 
             if (this.chatApi == ChatApi.mebo) this.mebo(fromUUID, fromName, message, type);
             if (this.chatApi == ChatApi.openai) this.openai(fromUUID, fromName, message, type);
+            if (this.chatApi == ChatApi.chatgpt) this.chatgpt(fromUUID, fromName, message, type);
             MyApplication.lastChatDateTime = DateTime.Now;
         }
 
@@ -247,6 +248,105 @@ namespace SecondBot.Client {
                     }
                     throw new Exception($"{completionResult.Error.Code}: {completionResult.Error.Message}");
                 }
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                this.mclient.Say(fromUUID, e.Message, 0, type);
+            } finally {
+                this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+                this.mclient.Self.AnimationStop(Animations.TYPE, false);
+            }
+        }
+
+        async void chatgpt(UUID fromUUID, string fromName, string message ,int type) {
+            Console.WriteLine("ChatGPT routine...");
+            this.mclient.Self.Chat(string.Empty, 0, ChatType.StartTyping);
+            this.mclient.Self.AnimationStart(Animations.TYPE, false);
+
+            if (this.openai_apikey == null || this.openai_apikey.Length == 0) {
+                this.mclient.Say(fromUUID, "openai_apikey null", 0, type);
+
+                this.mclient.Self.Chat(string.Empty, 0, ChatType.StopTyping);
+                this.mclient.Self.AnimationStop(Animations.TYPE, false);
+                return;
+            }
+
+            try {
+                if (message.Contains("関係を解消")) {
+                    if (openai_dic.ContainsKey(fromUUID)) {
+                        Queue<List<string>> q = openai_dic[fromUUID];
+                        while (q.Count > 0)
+                        {
+                            List<string>? outObj;
+                            q.TryDequeue(out outObj); // 先頭を取り出す
+                        }
+                    }
+                    throw new Exception("queueを空にしました");
+                }
+                var chatGptService = new OpenAI.GPT3.Managers.OpenAIService(new OpenAI.GPT3.OpenAiOptions(){
+                    ApiKey = this.openai_apikey
+                });
+
+                var messages = new List<OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage>();
+                //messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromSystem("あなたはセクシーなお姉さんです。あなたの名前は立川くんです。あなたはSecond Lifeの住人であり、ウサギのような姿をしています。"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("あなたの名前はなんですか？"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("ボクの名前は立川くんだよ！"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("立川くんは普段何をしているの？"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("ボクはSecond Lifeで友達とチャットをしたり、おしゃれなアバターを作成したり、イベントに参加したりしているよ。また、Second Lifeの世界を探検して新しい場所を発見したり、ゲームをプレイしたりすることもあるよ。"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("おはよう！"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("くー、みんな・・・3月を受け入れてしまっているのか・・・"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("( ˘ω˘ )ｽﾔｧ…"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("おやすー"));
+
+                foreach (var item in this.openai_dic) {
+                    if (item.Key == fromUUID) {
+                        foreach(var item2 in item.Value) {
+                            messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser(item2[0]));
+                            messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance(item2[1]));
+                        }
+                    }
+                }
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser(message));
+
+                var result = await chatGptService.ChatCompletion.CreateCompletion(
+                    new OpenAI.GPT3.ObjectModels.RequestModels.ChatCompletionCreateRequest() {
+                        Messages = messages,
+                        MaxTokens = 500,
+                        Model = OpenAI.GPT3.ObjectModels.Models.ChatGpt3_5Turbo
+                    });
+                if (result.Successful) {
+                    Console.WriteLine(result.Choices.First().Message.Content);
+                    string answer = result.Choices.First().Message.Content;
+                    this.mclient.Say(fromUUID, answer, 0, type);
+
+                    if (openai_dic.ContainsKey(fromUUID)) {
+                        Queue<List<string>> q = openai_dic[fromUUID];
+                        List<string> mes2 = new List<string>();
+                        mes2.Add(message);
+                        mes2.Add(answer);
+                        while (q.Count > 5)
+                        {
+                            List<string>? outObj;
+                            q.TryDequeue(out outObj); // 先頭を取り出す
+                        }
+                        q.Enqueue(mes2);
+                    } else {
+                        // Add
+                        Queue<List<string>> q2 = new Queue<List<string>>();
+                        List<string> mes3 = new List<string>();
+                        mes3.Add(message);
+                        mes3.Add(answer);
+                        q2.Enqueue(mes3);
+
+                        openai_dic.Add(fromUUID, q2);
+                    }
+
+                } else {
+                    if (result.Error == null) {
+                        throw new Exception("Unknown Error");
+                    }
+                    throw new Exception($"{result.Error.Code}: {result.Error.Message}");
+                }
+
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
                 this.mclient.Say(fromUUID, e.Message, 0, type);

@@ -65,6 +65,9 @@ tachikawa chatapi mebo
 立川君チャットAPI openai
 tachikawa chatapi openai
     使用するチャットAPIをopenaiにします。
+立川君チャットAPI chatgpt
+tachikawa chatapi chatgpt
+    使用するチャットAPIをchatgptにします。
 立川君どこ
 tachikawa where
     現在地を返します。
