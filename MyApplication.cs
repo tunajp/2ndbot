@@ -129,7 +129,7 @@ namespace SecondBot.Client {
             commandDic.Add("animListCommand", new List<string>(){"アニメリスト", "anim list"});
             commandDic.Add("animCommand", new List<string>(){"アニメ", "anim"});
             commandDic.Add("danceCommand", new List<string>(){"踊", "dance"});
-            commandDic.Add("secondLifeCommand", new List<string>(){"セカンドライフ", "Second Life", "SecondLife"});
+            //commandDic.Add("secondLifeCommand", new List<string>(){"セカンドライフ", "Second Life", "SecondLife"}); // 立川くんにSecond Lifeについて語ってほしいのでコメントアウト
             commandDic.Add("itemListCommand", new List<string>(){"アイテムリスト", "item list"});
             commandDic.Add("attachCommand", new List<string>(){"attach"});
             commandDic.Add("detachCommand", new List<string>(){"detach"});
