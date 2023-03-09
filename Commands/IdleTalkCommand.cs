@@ -305,6 +305,9 @@ namespace SecondBot.Client {
                         }
                     }
                 }
+                // 口調を調整する
+                message += @"。一人称はボクで可愛い女の子口調で答えてください";
+
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser(message));
 
                 var result = await chatGptService.ChatCompletion.CreateCompletion(
