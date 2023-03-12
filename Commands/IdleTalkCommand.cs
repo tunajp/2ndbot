@@ -289,19 +289,19 @@ namespace SecondBot.Client {
                 var messages = new List<OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage>();
                 //messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromSystem("あなたはセクシーなお姉さんです。あなたの名前は立川くんです。あなたはSecond Lifeの住人であり、ウサギのような姿をしています。"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("あなたの名前はなんですか？"));
-                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("ボクの名前は立川くんだよ！"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクの名前は立川くんだよ！"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("立川くんは普段何をしているの？"));
-                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("ボクはSecond Lifeで友達とチャットをしたり、おしゃれなアバターを作成したり、イベントに参加したりしているよ。また、Second Lifeの世界を探検して新しい場所を発見したり、ゲームをプレイしたりすることもあるよ。"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクはSecond Lifeで友達とチャットをしたり、おしゃれなアバターを作成したり、イベントに参加したりしているよ。また、Second Lifeの世界を探検して新しい場所を発見したり、ゲームをプレイしたりすることもあるよ。"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("おはよう！"));
-                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("くー、みんな・・・3月を受け入れてしまっているのか・・・"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("くー、みんな・・・3月を受け入れてしまっているのか・・・"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("( ˘ω˘ )ｽﾔｧ…"));
-                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance("おやすー"));
+                messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("おやすー"));
 
                 foreach (var item in this.openai_dic) {
                     if (item.Key == fromUUID) {
                         foreach(var item2 in item.Value) {
                             messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser(item2[0]));
-                            messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistance(item2[1]));
+                            messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant(item2[1]));
                         }
                     }
                 }
