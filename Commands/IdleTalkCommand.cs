@@ -208,13 +208,13 @@ namespace SecondBot.Client {
                 prompt += "AI:";
                 Console.WriteLine(prompt);
 
-                var completionResult = await openAiService.Completions.Create(new OpenAI.GPT3.ObjectModels.RequestModels.CompletionCreateRequest() {
+                var completionResult = await openAiService.Completions.CreateCompletion(new OpenAI.GPT3.ObjectModels.RequestModels.CompletionCreateRequest() {
                     Prompt = prompt,
                     MaxTokens = 120,
                     Echo = false,
                     Temperature = 0.7f,
                     Stop = "\n",
-                }, OpenAI.GPT3.ObjectModels.Models.Model.TextDavinciV3);
+                }, OpenAI.GPT3.ObjectModels.Models.TextDavinciV3);
                 if (completionResult.Successful) {
                     Console.WriteLine();
                     string answer = completionResult.Choices.FirstOrDefault().Text;
@@ -258,7 +258,13 @@ namespace SecondBot.Client {
         }
 
         async void chatgpt(UUID fromUUID, string fromName, string message ,int type) {
-            Console.WriteLine("ChatGPT routine...");
+            var names = new Dictionary<UUID, string>();
+            names.Add(new UUID("bb5c796d-8bc5-4fdd-8a0b-849119570fc7"), "つなかん");
+            names.Add(new UUID("4b8ef6e1-d19e-429c-8734-c39d94499873"), "Mike");
+            names.Add(new UUID("329211d0-ed42-48ee-a850-f6ec16b9c146"), "あかね");
+            names.Add(new UUID("580e4586-f5da-4bbc-a24d-f971b0608a41"), "とら");
+            names.Add(new UUID("3af08b8d-1f61-4cf1-9391-bccabfa635ca"), "マルセリーヌ");
+
             this.mclient.Self.Chat(string.Empty, 0, ChatType.StartTyping);
             this.mclient.Self.AnimationStart(Animations.TYPE, false);
 
@@ -286,10 +292,20 @@ namespace SecondBot.Client {
                     ApiKey = this.openai_apikey
                 });
 
+                string name = null;
+                foreach (var name_dic in names) {
+                    if (name_dic.Key == fromUUID) {
+                        name = name_dic.Value;
+                    }
+                }
                 var messages = new List<OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage>();
                 //messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromSystem("あなたはセクシーなお姉さんです。あなたの名前は立川くんです。あなたはSecond Lifeの住人であり、ウサギのような姿をしています。"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("あなたの名前はなんですか？"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクの名前は立川くんだよ！"));
+                if (name != null) {
+                    messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("私の名前は" + name + "です。"));
+                    messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("よろしくね。" + name + "さん！"));
+                }
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("立川くんは普段何をしているの？"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクはSecond Lifeで友達とチャットをしたり、おしゃれなアバターを作成したり、イベントに参加したりしているよ。また、Second Lifeの世界を探検して新しい場所を発見したり、ゲームをプレイしたりすることもあるよ。"));
                 messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromUser("おはよう！"));
@@ -315,6 +331,7 @@ namespace SecondBot.Client {
                         Messages = messages,
                         MaxTokens = 500,
                         Model = OpenAI.GPT3.ObjectModels.Models.ChatGpt3_5Turbo
+                        //Model = OpenAI.GPT3.ObjectModels.Models.Gpt4 // 現状遅くて高いので・・・
                     });
                 if (result.Successful) {
                     Console.WriteLine(result.Choices.First().Message.Content);
