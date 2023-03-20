@@ -296,7 +296,11 @@ namespace SecondBot.Client {
                 foreach (var name_dic in names) {
                     if (name_dic.Key == fromUUID) {
                         name = name_dic.Value;
+                        break;
                     }
+                }
+                if (name == null) {
+                    name = fromName;
                 }
                 var messages = new List<OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage>();
                 //messages.Add(OpenAI.GPT3.ObjectModels.RequestModels.ChatMessage.FromSystem("あなたはセクシーなお姉さんです。あなたの名前は立川くんです。あなたはSecond Lifeの住人であり、ウサギのような姿をしています。"));
