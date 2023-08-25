@@ -60,15 +60,15 @@ namespace SecondBot.Client {
 
             this.mclient.Say(fromUUID, "立川画伯におまかせあれ！！！", 0, type);
 
-            var openAiService = new OpenAI.GPT3.Managers.OpenAIService(new OpenAI.GPT3.OpenAiOptions(){
+            var openAiService = new OpenAI.Managers.OpenAIService(new OpenAI.OpenAiOptions(){
                 ApiKey = this.openai_apikey
             });
             var imageResult = await openAiService.CreateImage(
-                new OpenAI.GPT3.ObjectModels.RequestModels.ImageCreateRequest() {
+                new OpenAI.ObjectModels.RequestModels.ImageCreateRequest() {
                     Prompt = prompt,
                     N =2, // 画像の枚数
-                    Size = OpenAI.GPT3.ObjectModels.StaticValues.ImageStatics.Size.Size1024,
-                    ResponseFormat = OpenAI.GPT3.ObjectModels.StaticValues.ImageStatics.ResponseFormat.Url,
+                    Size = OpenAI.ObjectModels.StaticValues.ImageStatics.Size.Size1024,
+                    ResponseFormat = OpenAI.ObjectModels.StaticValues.ImageStatics.ResponseFormat.Url,
                     User = fromName // 任意
                 });
             if (imageResult.Successful) {
