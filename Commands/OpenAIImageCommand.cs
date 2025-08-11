@@ -60,15 +60,15 @@ namespace SecondBot.Client {
 
             this.mclient.Say(fromUUID, "立川画伯におまかせあれ！！！", 0, type);
 
-            var openAiService = new OpenAI.Managers.OpenAIService(new OpenAI.OpenAiOptions(){
+            var openAiService = new Betalgo.Ranul.OpenAI.Managers.OpenAIService(new Betalgo.Ranul.OpenAI.OpenAIOptions(){
                 ApiKey = this.openai_apikey
             });
             var imageResult = await openAiService.CreateImage(
-                new OpenAI.ObjectModels.RequestModels.ImageCreateRequest() {
+                new Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ImageCreateRequest() {
                     Prompt = prompt,
                     N =2, // 画像の枚数
-                    Size = OpenAI.ObjectModels.StaticValues.ImageStatics.Size.Size1024,
-                    ResponseFormat = OpenAI.ObjectModels.StaticValues.ImageStatics.ResponseFormat.Url,
+                    Size = Betalgo.Ranul.OpenAI.ObjectModels.StaticValues.ImageStatics.Size.Size1024,
+                    ResponseFormat = Betalgo.Ranul.OpenAI.ObjectModels.StaticValues.ImageStatics.ResponseFormat.Url,
                     User = fromName // 任意
                 });
             if (imageResult.Successful) {

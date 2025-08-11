@@ -161,7 +161,7 @@ namespace SecondBot.Client {
                     }
                     throw new Exception("queueを空にしました");
                 }
-                var openAiService = new OpenAI.Managers.OpenAIService(new OpenAI.OpenAiOptions(){
+                var openAiService = new Betalgo.Ranul.OpenAI.Managers.OpenAIService(new Betalgo.Ranul.OpenAI.OpenAIOptions(){
                     ApiKey = this.openai_apikey
                 });
 
@@ -208,13 +208,13 @@ namespace SecondBot.Client {
                 prompt += "AI:";
                 Console.WriteLine(prompt);
 
-                var completionResult = await openAiService.Completions.CreateCompletion(new OpenAI.ObjectModels.RequestModels.CompletionCreateRequest() {
+                var completionResult = await openAiService.Completions.CreateCompletion(new Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.CompletionCreateRequest() {
                     Prompt = prompt,
                     MaxTokens = 120,
                     Echo = false,
                     Temperature = 0.7f,
                     Stop = "\n",
-                }, OpenAI.ObjectModels.Models.TextDavinciV3);
+                }, Betalgo.Ranul.OpenAI.ObjectModels.Models.Gpt_4o_mini);
                 if (completionResult.Successful) {
                     Console.WriteLine();
                     string answer = completionResult.Choices.FirstOrDefault().Text;
@@ -288,7 +288,7 @@ namespace SecondBot.Client {
                     }
                     throw new Exception("queueを空にしました");
                 }
-                var chatGptService = new OpenAI.Managers.OpenAIService(new OpenAI.OpenAiOptions(){
+                var chatGptService = new Betalgo.Ranul.OpenAI.Managers.OpenAIService(new Betalgo.Ranul.OpenAI.OpenAIOptions(){
                     ApiKey = this.openai_apikey
                 });
 
@@ -302,39 +302,39 @@ namespace SecondBot.Client {
                 if (name == null) {
                     name = fromName;
                 }
-                var messages = new List<OpenAI.ObjectModels.RequestModels.ChatMessage>();
+                var messages = new List<Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage>();
                 //messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromSystem("あなたはセクシーなお姉さんです。あなたの名前は立川くんです。あなたはSecond Lifeの住人であり、ウサギのような姿をしています。"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("あなたの名前はなんですか？"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクの名前は立川くんだよ！"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("あなたの名前はなんですか？"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクの名前は立川くんだよ！"));
                 if (name != null) {
-                    messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("私の名前は" + name + "です。"));
-                    messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("よろしくね。" + name + "さん！"));
+                    messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("私の名前は" + name + "です。"));
+                    messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("よろしくね。" + name + "さん！"));
                 }
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("立川くんは普段何をしているの？"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクはSecond Lifeで友達とチャットをしたり、おしゃれなアバターを作成したり、イベントに参加したりしているよ。また、Second Lifeの世界を探検して新しい場所を発見したり、ゲームをプレイしたりすることもあるよ。"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("おはよう！"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("くー、みんな・・・3月を受け入れてしまっているのか・・・"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("( ˘ω˘ )ｽﾔｧ…"));
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("おやすー"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("立川くんは普段何をしているの？"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("ボクはSecond Lifeで友達とチャットをしたり、おしゃれなアバターを作成したり、イベントに参加したりしているよ。また、Second Lifeの世界を探検して新しい場所を発見したり、ゲームをプレイしたりすることもあるよ。"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("おはよう！"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("くー、みんな・・・3月を受け入れてしまっているのか・・・"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser("( ˘ω˘ )ｽﾔｧ…"));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant("おやすー"));
 
                 foreach (var item in this.openai_dic) {
                     if (item.Key == fromUUID) {
                         foreach(var item2 in item.Value) {
-                            messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser(item2[0]));
-                            messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant(item2[1]));
+                            messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser(item2[0]));
+                            messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromAssistant(item2[1]));
                         }
                     }
                 }
                 // 口調を調整する
                 //message += @"。一人称はボクで可愛い女の子口調で答えてください";
 
-                messages.Add(OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser(message));
+                messages.Add(Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatMessage.FromUser(message));
 
                 var result = await chatGptService.ChatCompletion.CreateCompletion(
-                    new OpenAI.ObjectModels.RequestModels.ChatCompletionCreateRequest() {
+                    new Betalgo.Ranul.OpenAI.ObjectModels.RequestModels.ChatCompletionCreateRequest() {
                         Messages = messages,
                         MaxTokens = 500,
-                        Model = OpenAI.ObjectModels.Models.ChatGpt3_5Turbo
+                        Model = Betalgo.Ranul.OpenAI.ObjectModels.Models.Gpt_4o_mini
                         //Model = OpenAI.ObjectModels.Models.Gpt4 // 現状遅くて高いので・・・
                     });
                 if (result.Successful) {

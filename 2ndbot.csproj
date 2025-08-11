@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Betalgo.OpenAI" Version="7.1.5" />
+    <PackageReference Include="Betalgo.Ranul.OpenAI" Version="9.1.0" />
     <PackageReference Include="GalMoji" Version="0.0.1" />
     <PackageReference Include="IronPython" Version="3.4.0" />
     <PackageReference Include="LibNMeCab.IpaDicBin" Version="0.10.0" />
