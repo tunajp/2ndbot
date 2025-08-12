@@ -566,13 +566,15 @@ namespace SecondBot.Client
                         inferenceParams))
                 {
                     answer += text;
-                    answer = answer.Replace("Assistant: ", ""); // Remove line breaks.
-                    answer = answer.Replace("Assistant:", ""); // Remove line breaks.
-                    answer = answer.Replace("Assistant", ""); // Remove line breaks.
-                    answer = answer.Replace("User: ", ""); // Remove line breaks.
-                    answer = answer.Replace("User:", ""); // Remove line breaks.
-                    answer = answer.Replace("User", ""); // Remove line breaks.
-                    answer = answer.Replace("\n", ""); // Remove leading and trailing spaces.
+                    answer = answer.Replace("Assistant: ", "");
+                    answer = answer.Replace("Assistant:", "");
+                    answer = answer.Replace("Assistant", "");
+                    answer = answer.Replace("User: ", "");
+                    answer = answer.Replace("User:", "");
+                    answer = answer.Replace("User", "");
+                    answer = answer.Replace(":", "");
+                    answer = answer.TrimEnd();
+                    answer = answer.Replace("\n", "");
                     //Console.Write(answer);
                 }
 
