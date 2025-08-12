@@ -14,6 +14,7 @@
         <mebo_apikey></mebo_apikey>
         <mebo_agent_id></mebo_agent_id>
         <openai_apikey></openai_apikey>
+        <localllm_path></localllm_path>
         <script>scripts/default.py</script>
         <owner>ownerfirstname Resident</owner>
     </bot>

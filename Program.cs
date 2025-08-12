@@ -32,6 +32,7 @@ namespace SecondBot.Client {
                     String? mebo_apikey = bot.Element("mebo_apikey")?.Value;
                     String? mebo_agent_id = bot.Element("mebo_agent_id")?.Value;
                     String? openai_apikey = bot.Element("openai_apikey")?.Value;
+                    String? localllm_path = bot.Element("localllm_path")?.Value;
                     String? script = bot.Element("script")?.Value;
                     String? owner = bot.Element("owner")?.Value;
                     if (fistname == null || fistname.Length == 0
@@ -47,7 +48,7 @@ namespace SecondBot.Client {
                     if (start == null) start = "last";
 
                     Console.WriteLine(fistname + " " + lastname + " " + nicknames[0] +" ...starting");
-                    apps.Add(new MyApplication(fistname, lastname, password, start, nicknames, home, bed, mebo_apikey, mebo_agent_id, openai_apikey, script,owner));
+                    apps.Add(new MyApplication(fistname, lastname, password, start, nicknames, home, bed, mebo_apikey, mebo_agent_id, openai_apikey, localllm_path, script,owner));
                     // アプリケーション数が0になったら終了する
                     myAppCount += 1;
                 }

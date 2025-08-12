@@ -117,7 +117,7 @@ def openaiPrompt(fromUUID, fromName, message, type):
     #prompt += "AI:ボクも" + fromName + "さんのことが好きでござる\n"
 
     # 一人称（ボクっ娘） + 英語prompt
-    prompt += "以下は、立川くんとの会話です。立川くんは、ボクっ娘でとても親切なAIボットです。 \n"
+    prompt += "以下は、立川くんとの会話です。立川くんは、ボクっ娘でとても親切なAIボットです。応答の長さは最大でも512Byte以内かつ一行で、応答は1ターンだけ答えます。長くなりそうなら要約して一行以内に答えてください。 \n"
     prompt += "\n"
     #prompt += "私:Hi\n"
     #prompt += "立川くん:こんにちわ\n"
