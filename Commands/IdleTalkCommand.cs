@@ -50,21 +50,11 @@ namespace SecondBot.Client
         private LLamaContext? localllm_context;
         private InteractiveExecutor? localllm_executor;
 
-        public IdleTalkCommand(MyClient mclient)
+        public IdleTalkCommand(MyClient mclient, string? loacalllm_path)
         {
             this.mclient = mclient;
             this.chatApi = ChatApi.mebo;
-
-
-        }
-        public void setKeys(ChatApi chatApi, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? localllm_path, string openai_prompt)
-        {
-            this.chatApi = chatApi;
-            this.mebo_apikey = mebo_apikey;
-            this.mebo_agent_id = mebo_agent_id;
-            this.openai_apikey = openai_apikey;
-            this.openai_prompt = openai_prompt;
-            this.localllm_path = localllm_path;
+            this.localllm_path = loacalllm_path;
 
             var parameters = new ModelParams(this.localllm_path)
             {
@@ -75,6 +65,15 @@ namespace SecondBot.Client
             this.localllm_context = this.localllm_model.CreateContext(parameters);
             this.localllm_executor = new InteractiveExecutor(this.localllm_context);
 
+        }
+        public void setKeys(ChatApi chatApi, string? mebo_apikey, string? mebo_agent_id, string? openai_apikey, string? localllm_path, string openai_prompt)
+        {
+            this.chatApi = chatApi;
+            this.mebo_apikey = mebo_apikey;
+            this.mebo_agent_id = mebo_agent_id;
+            this.openai_apikey = openai_apikey;
+            this.openai_prompt = openai_prompt;
+            this.localllm_path = localllm_path;
         }
 
         public bool IsJapanese(string text)

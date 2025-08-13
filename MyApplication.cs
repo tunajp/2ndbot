@@ -324,7 +324,7 @@ namespace SecondBot.Client {
             updateTimer.Elapsed += new System.Timers.ElapsedEventHandler(updateTimer_Elapsed);
             updateTimer.Start();
 
-            this.idletalkcommand = new IdleTalkCommand(this.mclient);
+            this.idletalkcommand = new IdleTalkCommand(this.mclient, localllm_path);
             this.standupcommand = new StandupCommand(this.mclient);
             this.teleportcommand = new TeleportCommand(this.mclient);
             this.movecommand = new MoveCommand(this.mclient);
